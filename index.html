@@ -3,53 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fyndo | Deals & Community Shopping</title>
+  <title>Fyndo | Group Deals & Community Shopping</title>
   
-  <!-- Modern Clean Typography (Inter & Plus Jakarta Sans) -->
+  <!-- Modern Clean Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- FontAwesome Icons for E-commerce -->
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
-  <!-- Application CSS -->
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div id="app">
-    <!-- Top Announcement Bar -->
-    <div class="top-bar">
-      <span>🎉 <strong>DealShare Special:</strong> Buy with 2+ neighbors to unlock up to 60% OFF on daily essentials!</span>
+    <!-- Top Deal Alert Bar -->
+    <div class="top-announcement">
+      <div class="container announcement-inner">
+        <span><i class="fa-solid fa-bolt"></i> <strong>Group Deal Hour:</strong> Team up with neighbors & save up to 60%!</span>
+        <span class="delivery-time"><i class="fa-regular fa-clock"></i> Delivery in 24 Hours</span>
+      </div>
     </div>
 
     <!-- Main Navigation Header -->
-    <header id="main-header" class="site-header"></header>
+    <header class="site-header">
+      <div class="container header-inner">
+        <!-- Brand Logo -->
+        <div class="brand-logo">
+          <a href="#" class="logo-link">
+            <span class="logo-icon"><i class="fa-solid fa-basket-shopping"></i></span>
+            <span class="logo-text">Fyndo<span class="logo-dot">.</span></span>
+          </a>
+          <span class="brand-tagline">Bachat Har Deal Par</span>
+        </div>
 
-    <!-- Main Storefront Content -->
-    <main id="main-content" class="container">
-      <!-- DealShare-style Group Deal Hero Banner -->
-      <section id="hero-banner" class="hero-section"></section>
+        <!-- DealShare-style Location Selector -->
+        <div class="location-picker" id="location-selector">
+          <i class="fa-solid fa-location-dot"></i>
+          <div class="location-text">
+            <span class="deliver-label">Deliver to:</span>
+            <!-- AFTER -->
+            <span class="current-city" id="current-city">Tindola, 225003</span>
+          </div>
+          <i class="fa-solid fa-angle-down"></i>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search for aata, dal, snacks, oil..." />
+          <button type="button" class="btn-search">Search</button>
+        </div>
+
+        <!-- Actions: User Profile & Cart Button -->
+        <div class="header-actions">
+          <button class="action-btn" id="login-btn">
+            <i class="fa-regular fa-user"></i>
+            <span>Sign In</span>
+          </button>
+          
+          <button class="action-btn cart-btn" id="open-cart-btn">
+            <div class="cart-icon-wrapper">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span class="cart-badge" id="cart-badge">0</span>
+            </div>
+            <div class="cart-text">
+              <span class="cart-label">My Cart</span>
+              <span class="cart-total" id="header-cart-total">₹0</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container main-content">
+      <!-- Hero Banner (DealShare Community Deal Style) -->
+      <section class="hero-banner">
+        <div class="hero-content">
+          <div class="hero-badge"><i class="fa-solid fa-users"></i> Community Group Buying</div>
+          <h1 class="hero-title">Shop Together, <span class="highlight">Save Bigger!</span></h1>
+          <p class="hero-desc">
+            Unlock wholesale prices directly from manufacturers. Choose <strong>Group Buy</strong> on any product to share savings with your community!
+          </p>
+          <div class="hero-stats">
+            <div class="stat-pill"><i class="fa-solid fa-truck-fast"></i> Free Delivery Over ₹199</div>
+            <div class="stat-pill"><i class="fa-solid fa-tags"></i> Up to 60% OFF Daily</div>
+            <div class="stat-pill"><i class="fa-solid fa-shield-halved"></i> 100% Quality Guaranteed</div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="deal-card-badge">⚡ Deal of the Day</div>
+          <h3>Chana Dal & Cooking Oil Combo</h3>
+          <p class="deal-subtext">500+ groups completed today</p>
+          <div class="deal-pricing">
+            <span class="deal-discount">52% OFF</span>
+            <span class="deal-price">₹149</span>
+            <span class="deal-mrp">₹310</span>
+          </div>
+          <button class="btn-group-deal" onclick="window.scrollTo({top: 500, behavior: 'smooth'})">
+            Explore Deals <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
 
       <!-- Category Filter Tabs -->
-      <section id="category-section" class="category-section"></section>
+      <section class="categories-container">
+        <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Shop by Category</h2>
+        <div class="category-tabs" id="category-tabs">
+          <button class="category-btn active" data-category="all">All Deals</button>
+          <button class="category-btn" data-category="grocery">Grocery & Staples</button>
+          <button class="category-btn" data-category="snacks">Snacks & Drinks</button>
+          <button class="category-btn" data-category="fruits-veg">Fruits & Veggies</button>
+          <button class="category-btn" data-category="household">Household Essentials</button>
+          <button class="category-btn" data-category="personal-care">Personal Care</button>
+        </div>
+      </section>
 
-      <!-- Products Grid -->
-      <section id="products-section" class="products-section"></section>
+      <!-- Products Grid Section (Will be populated dynamically in Step 3) -->
+      <section class="products-section">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fa-solid fa-fire"></i> Live Group Deals</h2>
+          <span class="deal-counter"><i class="fa-solid fa-user-group"></i> 2,410 People Shopping Now</span>
+        </div>
+        <div class="products-grid" id="products-grid">
+          <!-- Products will render here dynamically -->
+        </div>
+      </section>
     </main>
 
     <!-- Slide-over Cart Drawer -->
     <div id="cart-drawer-overlay" class="drawer-overlay hidden"></div>
-    <aside id="cart-drawer" class="cart-drawer"></aside>
+    <aside id="cart-drawer" class="cart-drawer hidden"></aside>
 
-    <!-- Checkout & Address Selection Modal -->
+    <!-- Checkout Modal -->
     <div id="checkout-modal" class="modal-overlay hidden"></div>
 
-    <!-- Order Confirmation Screen -->
+    <!-- Order Success Modal -->
     <div id="order-success-modal" class="modal-overlay hidden"></div>
   </div>
 
-  <!-- Modular Scripts -->
+  <!-- Scripts -->
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/checkout.js"></script>
