@@ -1,5 +1,5 @@
 // ========================================================
-// Fyndo Cart State: Full Screen Dedicated Cart Page
+// Fyndo Cart State: Manual Open Only & Toast Feedback
 // ========================================================
 
 const CART_STORAGE_KEY = "fyndo_cart_v1";
@@ -13,7 +13,7 @@ function saveCart() {
   renderCartDrawer();
 }
 
-// 2. Add Item to Cart
+// 2. Add Item to Cart (DOES NOT automatically open cart anymore!)
 function addToCart(productId, buyType) {
   const product = PRODUCTS.find((p) => p.id === productId);
   if (!product) return;
@@ -39,10 +39,38 @@ function addToCart(productId, buyType) {
   }
 
   saveCart();
-  openCartDrawer();
+  
+  // Show quick notification on screen without navigating away
+  showCartToast(product.name, buyType);
 }
 
-// 3. Update Quantity
+// 3. Quick Toast Notification
+function showCartToast(productName, buyType) {
+  let toast = document.getElementById("cart-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "cart-toast";
+    toast.className = "cart-toast";
+    document.body.appendChild(toast);
+  }
+
+  const typeLabel = buyType === "group" ? "Group Deal Price" : "Solo Price";
+  toast.innerHTML = `
+    <i class="fa-solid fa-circle-check"></i>
+    <div class="toast-text">
+      <strong>Added to Cart!</strong>
+      <span>${productName.substring(0, 32)}... (${typeLabel})</span>
+    </div>
+  `;
+
+  toast.classList.add("show");
+  clearTimeout(toast.toastTimeout);
+  toast.toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
+}
+
+// 4. Update Quantity (+1 or -1)
 function updateCartQuantity(itemKey, delta) {
   const itemIndex = cart.findIndex((item) => item.key === itemKey);
   if (itemIndex === -1) return;
@@ -55,13 +83,13 @@ function updateCartQuantity(itemKey, delta) {
   saveCart();
 }
 
-// 4. Delete Item Completely from Cart
+// 5. Delete Item from Cart
 function removeFromCart(itemKey) {
   cart = cart.filter((item) => item.key !== itemKey);
   saveCart();
 }
 
-// 5. Calculate Financials
+// 6. Calculate Financials
 function calculateCartTotals() {
   let totalItems = 0;
   let totalMRP = 0;
@@ -87,7 +115,7 @@ function calculateCartTotals() {
   };
 }
 
-// 6. Update Header Cart Badge
+// 7. Update Header Cart Badge
 function updateHeaderCartInfo() {
   const { totalItems, subtotal } = calculateCartTotals();
   const badge = document.getElementById("cart-badge");
@@ -97,7 +125,7 @@ function updateHeaderCartInfo() {
   if (totalDisplay) totalDisplay.innerText = `₹${subtotal}`;
 }
 
-// 7. Render FULL-SCREEN View
+// 8. Render FULL-SCREEN View
 function renderCartDrawer() {
   const drawer = document.getElementById("cart-drawer");
   if (!drawer) return;
@@ -147,7 +175,7 @@ function renderCartDrawer() {
           <i class="fa-solid fa-circle-check"></i>
           <div>
             <strong>Community Group Deal Active!</strong>
-            <p>You are saving <strong>₹${totalSavings}</strong> off the original MRP on this order.</p>
+            <p>You are saving <strong>₹${totalSavings}</strong> off original MRP on this order.</p>
           </div>
         </div>
 
@@ -237,7 +265,7 @@ function renderCartDrawer() {
   `;
 }
 
-// 8. Open / Close Helpers
+// 9. Open / Close Helpers (Only opened via Cart Button)
 function openCartDrawer() {
   const drawer = document.getElementById("cart-drawer");
   if (drawer) {
