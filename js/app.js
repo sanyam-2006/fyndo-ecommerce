@@ -1,4 +1,7 @@
+// ========================================================
 // Fyndo Main Application Logic: Product Rendering & Filters
+// ========================================================
+
 let currentCategory = "all";
 let searchQuery = "";
 
@@ -7,7 +10,7 @@ function renderProducts() {
   const grid = document.getElementById("products-grid");
   if (!grid) return;
 
-  // Filter products by category and search
+  // Filter products by category and search query
   const filtered = PRODUCTS.filter((product) => {
     const matchesCategory =
       currentCategory === "all" || product.category === currentCategory;
@@ -29,7 +32,7 @@ function renderProducts() {
     return;
   }
 
-  // Generate HTML for each product
+  // Generate HTML for each product card
   grid.innerHTML = filtered
     .map((product) => {
       const spotsLeft = product.groupRequired - product.groupJoined;
@@ -47,7 +50,7 @@ function renderProducts() {
             <span class="product-unit">${product.unit}</span>
             <h3 class="product-name" title="${product.name}">${product.name}</h3>
 
-            <!-- DealShare Group Buy Progress -->
+            <!-- DealShare Group Buy Progress Indicator -->
             <div class="group-status-bar">
               <div class="group-status-header">
                 <span><i class="fa-solid fa-users"></i> ${product.groupJoined}/${product.groupRequired} Buyers</span>
@@ -63,16 +66,16 @@ function renderProducts() {
               <span class="price-discount-tag">${product.discountPercent}% OFF</span>
             </div>
 
-            <!-- Dual Action Buttons -->
+            <!-- Dual Action Buttons (Solo vs Group Buy) -->
             <div class="product-actions">
               <!-- Solo Buy Button -->
-              <button class="btn-buy-solo" onclick="handleAddToCart('${product.id}', 'solo')">
+              <button class="btn-buy-solo" onclick="addToCart('${product.id}', 'solo')">
                 <span>Buy Solo</span>
                 <span class="btn-price-subtext">₹${product.soloPrice}</span>
               </button>
 
               <!-- Group Buy Button -->
-              <button class="btn-buy-group" onclick="handleAddToCart('${product.id}', 'group')">
+              <button class="btn-buy-group" onclick="addToCart('${product.id}', 'group')">
                 <span><i class="fa-solid fa-bolt"></i> Group Buy</span>
                 <span class="btn-price-subtext">₹${product.groupPrice}</span>
               </button>
@@ -108,18 +111,24 @@ function setupSearchFilter() {
   }
 }
 
-// Temporary placeholder for Cart click (will build fully in Step 4)
-function handleAddToCart(productId, type) {
-  if (typeof addToCart === "function") {
-    addToCart(productId, type);
-  } else {
-    alert(`Added to cart as ${type.toUpperCase()}! (Cart logic coming in Step 4)`);
+// 4. Setup Cart Header and Overlay Click Listeners
+function setupCartEventListeners() {
+  const openCartBtn = document.getElementById("open-cart-btn");
+  const overlay = document.getElementById("cart-drawer-overlay");
+
+  if (openCartBtn) {
+    openCartBtn.addEventListener("click", openCartDrawer);
+  }
+  if (overlay) {
+    overlay.addEventListener("click", closeCartDrawer);
   }
 }
 
-// Initialize on DOM Ready
+// 5. Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   setupCategoryFilters();
   setupSearchFilter();
+  setupCartEventListeners();
+  updateHeaderCartInfo(); // Sync cart badge and prices from localStorage
 });
