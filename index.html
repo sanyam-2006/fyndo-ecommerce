@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fyndo | Deals & Community Shopping</title>
+  
+  <!-- Modern Clean Typography (Inter & Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for E-commerce -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top Announcement Bar -->
+    <div class="top-bar">
+      <span>🎉 <strong>DealShare Special:</strong> Buy with 2+ neighbors to unlock up to 60% OFF on daily essentials!</span>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header id="main-header" class="site-header"></header>
+
+    <!-- Main Storefront Content -->
+    <main id="main-content" class="container">
+      <!-- DealShare-style Group Deal Hero Banner -->
+      <section id="hero-banner" class="hero-section"></section>
+
+      <!-- Category Filter Tabs -->
+      <section id="category-section" class="category-section"></section>
+
+      <!-- Products Grid -->
+      <section id="products-section" class="products-section"></section>
+    </main>
+
+    <!-- Slide-over Cart Drawer -->
+    <div id="cart-drawer-overlay" class="drawer-overlay hidden"></div>
+    <aside id="cart-drawer" class="cart-drawer"></aside>
+
+    <!-- Checkout & Address Selection Modal -->
+    <div id="checkout-modal" class="modal-overlay hidden"></div>
+
+    <!-- Order Confirmation Screen -->
+    <div id="order-success-modal" class="modal-overlay hidden"></div>
+  </div>
+
+  <!-- Modular Scripts -->
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/checkout.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
