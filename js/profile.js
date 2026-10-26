@@ -1,72 +1,23 @@
 // ===================================================================
-// FYNDO USER PROFILE, ADDRESS BOOK, AUTO-DELIVERY & ORDER MANAGEMENT
+// FYNDO USER PROFILE, ADDRESS BOOK, AUTO-DELIVERY & LIVE LOCATION
 // ===================================================================
 
 const ADDRESS_STORAGE_KEY = "fyndo_addresses_v1";
 const ORDERS_STORAGE_KEY = "fyndo_orders_v1";
+const LOCATION_STORAGE_KEY = "fyndo_detected_location_v1";
 
-// 1. Initial Default Address Book (Updated for Sanyam Baranwal, Lakhimpur-Kheri)
-let savedAddresses = JSON.parse(localStorage.getItem(ADDRESS_STORAGE_KEY)) || [
-  {
-    id: "addr-1",
-    fullName: "Sanyam Baranwal",
-    phone: "9336038779",
-    houseNo: "69, Maharaj Nagar",
-    area: "behind style bazaar",
-    city: "Lakhimpur-Kheri",
-    pincode: "262701",
-    state: "Uttar Pradesh",
-    tag: "HOME",
-    isDefault: true
-  }
-];
+// 1. Saved Addresses (Empty by default for new visitors; populates when user saves an address)
+let savedAddresses = JSON.parse(localStorage.getItem(ADDRESS_STORAGE_KEY)) || [];
 
-// Automatically update if legacy data exists in browser localStorage
-if (savedAddresses.length > 0 && (savedAddresses[0].fullName === "Sanyam Verma" || savedAddresses[0].city === "Tindola")) {
-  savedAddresses = [
-    {
-      id: "addr-1",
-      fullName: "Sanyam Baranwal",
-      phone: "9336038779",
-      houseNo: "69, Maharaj Nagar",
-      area: "behind style bazaar",
-      city: "Lakhimpur-Kheri",
-      pincode: "262701",
-      state: "Uttar Pradesh",
-      tag: "HOME",
-      isDefault: true
-    }
-  ];
-  localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(savedAddresses));
-}
+// 2. Orders List (Empty by default for new visitors; populates when user places live orders)
+let userOrdersList = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [];
 
-// 2. Initial Orders List
-let userOrdersList = JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [
-  {
-    orderId: "FYN-839201",
-    date: "25 Oct 2026",
-    placementTime: "11:30 AM",
-    status: "delivered", // 'active', 'delivered', 'cancelled'
-    deliveryTimestamp: Date.now() - 3600000,
-    estimatedDeliveryText: "Delivered on schedule",
-    deliveredAt: "1:30 PM",
-    totalPaid: 209,
-    totalSaved: 86,
-    hasGroupItems: true,
-    buyType: "Group Deal",
-    itemsCount: 1,
-    deliveryAddress: "69, Maharaj Nagar, behind style bazaar, Lakhimpur-Kheri - 262701",
-    items: [
-      {
-        name: "Aashirvaad Superior MP Shudh Chakki Atta",
-        unit: "5 kg Heavy Bag",
-        price: 209,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60"
-      }
-    ]
-  }
-];
+// 3. Detected Live Location State
+let detectedLocation = JSON.parse(localStorage.getItem(LOCATION_STORAGE_KEY)) || {
+  city: "Detecting Location...",
+  pincode: "",
+  fullText: "Detecting Location..."
+};
 
 function saveAddresses() {
   localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(savedAddresses));
@@ -78,16 +29,112 @@ function saveOrders() {
 }
 
 // ===================================================================
+// LIVE GEOLOCATION & REVERSE GEOCODING
+// Automatically detects current visitor's real live city & pincode
+// ===================================================================
+async function detectUserLiveLocation(forcePrompt = false) {
+  const navCity = document.getElementById("current-city");
+  const def = getDefaultAddress();
+
+  // If user already has a saved personal address, use that in navbar unless they force GPS refresh
+  if (def && !forcePrompt) {
+    if (navCity) navCity.innerText = `${def.city}, ${def.pincode}`;
+    return;
+  }
+
+  if (navCity && (!detectedLocation.pincode || forcePrompt)) {
+    navCity.innerText = "Locating...";
+  }
+
+  if (!navigator.geolocation) {
+    applyFallbackLocation("Select Location", "");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const locData = await reverseGeocodeCoordinates(lat, lon);
+        
+        detectedLocation = {
+          city: locData.city,
+          pincode: locData.pincode,
+          fullText: locData.pincode ? `${locData.city}, ${locData.pincode}` : locData.city
+        };
+        localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(detectedLocation));
+
+        // Update navbar if user hasn't set a personal address yet
+        if (!def || forcePrompt) {
+          if (navCity) navCity.innerText = detectedLocation.fullText;
+        }
+
+        if (forcePrompt) {
+          showToastNotification(`📍 Location detected: ${detectedLocation.fullText}`);
+          const homeModal = document.getElementById("home-address-modal");
+          if (homeModal && !homeModal.classList.contains("hidden")) {
+            openHomeLocationModal();
+          }
+        }
+      } catch (err) {
+        console.warn("Geocoding failed:", err);
+        applyFallbackLocation("Select Location", "");
+      }
+    },
+    (err) => {
+      console.warn("Geolocation denied or error:", err.message);
+      if (!def && navCity) {
+        navCity.innerText = detectedLocation.pincode ? detectedLocation.fullText : "Select Location";
+      }
+    },
+    { timeout: 10000, enableHighAccuracy: false }
+  );
+}
+
+// Reverse Geocoding with reliable free APIs
+async function reverseGeocodeCoordinates(lat, lon) {
+  // 1. Try BigDataCloud Client API (fast, free, CORS-friendly)
+  try {
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    if (res.ok) {
+      const data = await res.json();
+      const city = data.city || data.locality || data.principalSubdivision || "Current Location";
+      const pincode = data.postcode || "";
+      return { city, pincode };
+    }
+  } catch (e) {}
+
+  // 2. Fallback to OpenStreetMap Nominatim
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    if (res.ok) {
+      const data = await res.json();
+      const addr = data.address || {};
+      const city = addr.city || addr.town || addr.village || addr.suburb || addr.county || "Current Location";
+      const pincode = addr.postcode || "";
+      return { city, pincode };
+    }
+  } catch (e) {}
+
+  return { city: "Current Location", pincode: "" };
+}
+
+function applyFallbackLocation(city, pin) {
+  detectedLocation = { city, pincode: pin, fullText: pin ? `${city}, ${pin}` : city };
+  const navCity = document.getElementById("current-city");
+  const def = getDefaultAddress();
+  if (!def && navCity) navCity.innerText = detectedLocation.fullText;
+}
+
+// ===================================================================
 // AUTO-DELIVERY REAL-TIME CHECKER
-// Checks real current time against order.deliveryTimestamp
-// Automatically updates status from 'active' to 'delivered'
 // ===================================================================
 function checkAndUpdateAutoDelivery() {
   const currentTime = Date.now();
   let hasUpdates = false;
 
   userOrdersList.forEach((order) => {
-    // If order is active and current time has passed the scheduled delivery timestamp
     if (order.status === "active" && order.deliveryTimestamp && currentTime >= order.deliveryTimestamp) {
       order.status = "delivered";
       order.deliveredAt = new Date(order.deliveryTimestamp).toLocaleTimeString("en-IN", {
@@ -104,7 +151,7 @@ function checkAndUpdateAutoDelivery() {
   }
 }
 
-// Test Helper: Allows instantly marking an order as Delivered without waiting 2 hours
+// Test Helper: Allows instantly marking an order as Delivered
 function simulateOrderDelivery(orderId) {
   const target = userOrdersList.find((o) => o.orderId === orderId);
   if (target) {
@@ -120,7 +167,7 @@ function simulateOrderDelivery(orderId) {
   }
 }
 
-// 3. Open & Close Profile Dashboard
+// 4. Open & Close Profile Dashboard
 let currentProfileTab = "orders";
 let currentOrdersSubTab = "active";
 
@@ -140,10 +187,8 @@ function closeProfilePage() {
   }
 }
 
-// 4. Switch Main Sidebar Tab
 function switchProfileTab(tab) {
   currentProfileTab = tab;
-  
   document.querySelectorAll(".profile-nav-item").forEach((el) => {
     el.classList.remove("active");
   });
@@ -153,7 +198,6 @@ function switchProfileTab(tab) {
   renderProfileContent();
 }
 
-// 5. Render Content Area
 function renderProfileContent() {
   const contentArea = document.getElementById("profile-tab-content");
   if (!contentArea) return;
@@ -169,7 +213,6 @@ function renderProfileContent() {
 
 // --- TAB 1: ORDERS MANAGEMENT (Active, Delivered, Cancelled) ---
 function renderOrdersTab(container) {
-  // Always run real-time check before rendering orders!
   checkAndUpdateAutoDelivery();
 
   const filtered = userOrdersList.filter((o) => {
@@ -305,13 +348,15 @@ function cancelUserOrder(orderId) {
   }
 }
 
-// --- TAB 2: ADDRESS BOOK (Full Add, Edit, Change Default, Delete) ---
+// --- TAB 2: ADDRESS BOOK (Clean Empty State for New Visitors) ---
 function renderAddressBookTab(container) {
+  const currentCity = (detectedLocation.city && detectedLocation.city !== "Detecting Location...") ? detectedLocation.city : "";
+
   container.innerHTML = `
     <div class="profile-content-header address-header-flex">
       <div>
         <h2><i class="fa-solid fa-map-location-dot"></i> Saved Addresses</h2>
-        <p>Manage your delivery locations in Lakhimpur-Kheri for lightning-fast checkout.</p>
+        <p>Manage your delivery locations for fast 2-hour grocery delivery.</p>
       </div>
       <button class="btn-add-addr-modal" onclick="toggleAddAddressForm(true, 'add')">
         <i class="fa-solid fa-plus"></i> Add New Address
@@ -331,33 +376,33 @@ function renderAddressBookTab(container) {
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label><i class="fa-solid fa-user"></i> Full Name</label>
-            <input type="text" id="naddr-name" placeholder="Receiver full name" required />
+            <label><i class="fa-solid fa-user"></i> Full Name *</label>
+            <input type="text" id="naddr-name" placeholder="Receiver's full name" required />
           </div>
           <div class="form-group">
-            <label><i class="fa-solid fa-phone"></i> Phone Number</label>
-            <input type="tel" id="naddr-phone" placeholder="10-digit mobile number" required />
+            <label><i class="fa-solid fa-phone"></i> Phone Number *</label>
+            <input type="tel" id="naddr-phone" placeholder="10-digit mobile number" required pattern="[0-9]{10}" />
           </div>
         </div>
 
         <div class="form-group">
-          <label><i class="fa-solid fa-house"></i> House / Flat / Building No.</label>
+          <label><i class="fa-solid fa-house"></i> House / Flat / Building No. *</label>
           <input type="text" id="naddr-house" placeholder="Flat No., House No., Building Name" required />
         </div>
 
         <div class="form-group">
-          <label><i class="fa-solid fa-road"></i> Street / Colony / Landmark</label>
+          <label><i class="fa-solid fa-road"></i> Street / Colony / Landmark *</label>
           <input type="text" id="naddr-area" placeholder="Street, Colony, Area or Landmark" required />
         </div>
 
         <div class="form-grid-3">
           <div class="form-group">
-            <label><i class="fa-solid fa-city"></i> City</label>
-            <input type="text" id="naddr-city" value="Lakhimpur-Kheri" required />
+            <label><i class="fa-solid fa-city"></i> City *</label>
+            <input type="text" id="naddr-city" value="${currentCity}" placeholder="City" required />
           </div>
           <div class="form-group">
-            <label><i class="fa-solid fa-map-pin"></i> Pincode</label>
-            <input type="text" id="naddr-pin" value="262701" required />
+            <label><i class="fa-solid fa-map-pin"></i> Pincode *</label>
+            <input type="text" id="naddr-pin" value="${detectedLocation.pincode || ''}" placeholder="6-digit Pincode" required pattern="[0-9]{6}" />
           </div>
           <div class="form-group">
             <label><i class="fa-solid fa-tag"></i> Address Tag</label>
@@ -378,49 +423,64 @@ function renderAddressBookTab(container) {
       </form>
     </div>
 
-    <!-- Saved Address Cards -->
-    <div class="address-cards-grid">
-      ${savedAddresses
-        .map((addr) => {
-          return `
-            <div class="profile-addr-card ${addr.isDefault ? "is-default" : ""}">
-              <div class="addr-card-top">
-                <span class="addr-tag-pill">${addr.tag}</span>
-                ${addr.isDefault ? '<span class="badge-default-addr">CURRENT DEFAULT</span>' : ""}
-              </div>
+    <!-- Saved Address Cards or Empty State -->
+    ${
+      savedAddresses.length === 0
+        ? `
+        <div class="empty-orders-state">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <h3>No Saved Addresses Yet</h3>
+          <p>Add your home or office address to enable quick 2-hour grocery delivery.</p>
+          <button class="btn-primary-large" onclick="toggleAddAddressForm(true, 'add')">
+            <i class="fa-solid fa-plus"></i> Add Delivery Address
+          </button>
+        </div>
+        `
+        : `
+        <div class="address-cards-grid">
+          ${savedAddresses
+            .map((addr) => {
+              return `
+                <div class="profile-addr-card ${addr.isDefault ? "is-default" : ""}">
+                  <div class="addr-card-top">
+                    <span class="addr-tag-pill">${addr.tag}</span>
+                    ${addr.isDefault ? '<span class="badge-default-addr">CURRENT DEFAULT</span>' : ""}
+                  </div>
 
-              <h4 class="addr-user-name">${addr.fullName} <span class="addr-user-phone">(${addr.phone})</span></h4>
-              <p class="addr-full-text">${addr.houseNo}, ${addr.area}</p>
-              <p class="addr-city-text">${addr.city}, ${addr.state} - <strong>${addr.pincode}</strong></p>
+                  <h4 class="addr-user-name">${addr.fullName} <span class="addr-user-phone">(${addr.phone})</span></h4>
+                  <p class="addr-full-text">${addr.houseNo}, ${addr.area}</p>
+                  <p class="addr-city-text">${addr.city}, ${addr.state || ""} - <strong>${addr.pincode}</strong></p>
 
-              <div class="addr-card-actions">
-                ${
-                  !addr.isDefault
-                    ? `<button class="btn-set-default" onclick="setDefaultAddress('${addr.id}')">
-                        <i class="fa-solid fa-check"></i> Deliver Here (Set Default)
-                      </button>`
-                    : '<span class="default-active-text"><i class="fa-solid fa-circle-check"></i> Selected for Deliveries</span>'
-                }
-                
-                <div class="addr-actions-right">
-                  <button class="btn-edit-addr" onclick="openEditAddressForm('${addr.id}')" title="Edit Address Details">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                  </button>
+                  <div class="addr-card-actions">
+                    ${
+                      !addr.isDefault
+                        ? `<button class="btn-set-default" onclick="setDefaultAddress('${addr.id}')">
+                            <i class="fa-solid fa-check"></i> Deliver Here (Set Default)
+                          </button>`
+                        : '<span class="default-active-text"><i class="fa-solid fa-circle-check"></i> Selected for Deliveries</span>'
+                    }
+                    
+                    <div class="addr-actions-right">
+                      <button class="btn-edit-addr" onclick="openEditAddressForm('${addr.id}')" title="Edit Address Details">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                      </button>
 
-                  ${
-                    savedAddresses.length > 1
-                      ? `<button class="btn-delete-addr" onclick="deleteAddress('${addr.id}')" title="Delete Address">
-                          <i class="fa-regular fa-trash-can"></i>
-                        </button>`
-                      : ""
-                  }
+                      ${
+                        savedAddresses.length > 1
+                          ? `<button class="btn-delete-addr" onclick="deleteAddress('${addr.id}')" title="Delete Address">
+                              <i class="fa-regular fa-trash-can"></i>
+                            </button>`
+                          : ""
+                      }
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("")}
-    </div>
+              `;
+            })
+            .join("")}
+        </div>
+        `
+    }
   `;
 }
 
@@ -436,14 +496,14 @@ function toggleAddAddressForm(show, mode = "add") {
       if (heading) heading.innerHTML = `<i class="fa-solid fa-plus-circle"></i> Add a New Delivery Address`;
       if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Save Address`;
 
-      // Clear all fields with Lakhimpur-Kheri defaults
+      // Clear all fields for new input, prefilling city/pin from live location if available
       document.getElementById("naddr-edit-id").value = "";
       document.getElementById("naddr-name").value = "";
       document.getElementById("naddr-phone").value = "";
       document.getElementById("naddr-house").value = "";
       document.getElementById("naddr-area").value = "";
-      document.getElementById("naddr-city").value = "Lakhimpur-Kheri";
-      document.getElementById("naddr-pin").value = "262701";
+      document.getElementById("naddr-city").value = (detectedLocation.city && detectedLocation.city !== "Detecting Location...") ? detectedLocation.city : "";
+      document.getElementById("naddr-pin").value = detectedLocation.pincode || "";
       document.getElementById("naddr-tag").value = "HOME";
     }
     formBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -470,8 +530,8 @@ function openEditAddressForm(id) {
   document.getElementById("naddr-phone").value = target.phone || "";
   document.getElementById("naddr-house").value = target.houseNo || "";
   document.getElementById("naddr-area").value = target.area || "";
-  document.getElementById("naddr-city").value = target.city || "Lakhimpur-Kheri";
-  document.getElementById("naddr-pin").value = target.pincode || "262701";
+  document.getElementById("naddr-city").value = target.city || "";
+  document.getElementById("naddr-pin").value = target.pincode || "";
   document.getElementById("naddr-tag").value = target.tag || "HOME";
 
   document.getElementById("naddr-name").focus();
@@ -484,8 +544,8 @@ function handleSaveAddress(e) {
   const phone = document.getElementById("naddr-phone").value.trim();
   const house = document.getElementById("naddr-house").value.trim();
   const area = document.getElementById("naddr-area").value.trim();
-  const city = document.getElementById("naddr-city").value.trim() || "Lakhimpur-Kheri";
-  const pin = document.getElementById("naddr-pin").value.trim() || "262701";
+  const city = document.getElementById("naddr-city").value.trim();
+  const pin = document.getElementById("naddr-pin").value.trim();
   const tag = document.getElementById("naddr-tag").value;
 
   if (editId) {
@@ -536,13 +596,9 @@ function setDefaultAddress(id) {
 }
 
 function deleteAddress(id) {
-  if (savedAddresses.length <= 1) {
-    alert("You must keep at least one delivery address.");
-    return;
-  }
   if (confirm("Delete this address from your address book?")) {
     savedAddresses = savedAddresses.filter((a) => a.id !== id);
-    if (!savedAddresses.some((a) => a.isDefault)) {
+    if (savedAddresses.length > 0 && !savedAddresses.some((a) => a.isDefault)) {
       savedAddresses[0].isDefault = true;
     }
     saveAddresses();
@@ -552,21 +608,24 @@ function deleteAddress(id) {
 }
 
 function getDefaultAddress() {
+  if (!savedAddresses || savedAddresses.length === 0) return null;
   return savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
 }
 
 function syncActiveAddressToNavbar() {
   const def = getDefaultAddress();
   const navCity = document.getElementById("current-city");
-  if (navCity && def) {
+  
+  if (def && navCity) {
+    // OLD USER: Display saved default address
     navCity.innerText = `${def.city}, ${def.pincode}`;
-  }
-  if (typeof userAddress !== "undefined" && def) {
-    userAddress.fullName = def.fullName;
-    userAddress.phone = def.phone;
-    userAddress.houseNo = `${def.houseNo}, ${def.area}`;
-    userAddress.city = def.city;
-    userAddress.pincode = def.pincode;
+  } else if (navCity) {
+    // NEW USER: Display detected live location
+    if (detectedLocation && detectedLocation.pincode) {
+      navCity.innerText = detectedLocation.fullText;
+    } else {
+      detectUserLiveLocation();
+    }
   }
 }
 
@@ -574,10 +633,12 @@ function syncActiveAddressToNavbar() {
 let selectedRating = 5;
 
 function renderRateFyndoTab(container) {
+  const cityText = detectedLocation.city && detectedLocation.city !== "Detecting Location..." ? detectedLocation.city : "your city";
+
   container.innerHTML = `
     <div class="profile-content-header">
       <h2><i class="fa-solid fa-star"></i> Rate Your Fyndo Experience</h2>
-      <p>Help us improve our community grocery and wholesale group buying service in Lakhimpur-Kheri.</p>
+      <p>Help us improve our community grocery and wholesale group buying service in ${cityText}.</p>
     </div>
 
     <div class="rate-fyndo-card">
@@ -597,7 +658,7 @@ function renderRateFyndoTab(container) {
       <span class="rating-text-label" id="rating-text-label">Outstanding! (5 out of 5)</span>
 
       <div class="form-group" style="margin-top: 20px;">
-        <label>Your Feedback / Suggestions for Lakhimpur-Kheri Hub</label>
+        <label>Your Feedback / Suggestions for ${cityText} Hub</label>
         <textarea id="feedback-text" rows="4" placeholder="Tell us what items you want added, delivery speed, or pricing feedback..."></textarea>
       </div>
 
@@ -632,11 +693,13 @@ function submitFyndoRating() {
 }
 
 // ===================================================================
-// HOME PAGE LOCATION SELECTOR MODAL (CANNOT ADD NEW ADDRESS HERE)
+// HOME PAGE LOCATION SELECTOR MODAL
 // ===================================================================
 function openHomeLocationModal() {
   const modal = document.getElementById("home-address-modal");
   if (!modal) return;
+
+  const hasSaved = savedAddresses && savedAddresses.length > 0;
 
   modal.innerHTML = `
     <div class="modal-card">
@@ -646,33 +709,59 @@ function openHomeLocationModal() {
       </div>
 
       <div class="modal-body">
-        <p class="home-location-subtext">Choose from your previously saved delivery addresses:</p>
-
-        <div class="home-saved-addresses-list">
-          ${savedAddresses
-            .map((addr) => {
-              return `
-                <div class="home-addr-option ${addr.isDefault ? "selected" : ""}" onclick="selectHomeAddress('${addr.id}')">
-                  <div class="home-addr-radio">
-                    <input type="radio" name="home_addr_choice" ${addr.isDefault ? "checked" : ""} />
-                  </div>
-                  <div class="home-addr-info">
-                    <div class="home-addr-tag-row">
-                      <strong>${addr.fullName}</strong>
-                      <span class="addr-tag-pill">${addr.tag}</span>
-                      ${addr.isDefault ? '<span class="badge-home">CURRENT</span>' : ""}
-                    </div>
-                    <p>${addr.houseNo}, ${addr.area}, ${addr.city} - <strong>${addr.pincode}</strong></p>
-                  </div>
-                </div>
-              `;
-            })
-            .join("")}
+        <!-- Live GPS Detect Option -->
+        <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-crosshairs" style="color: #16A34A; font-size: 1.2rem;"></i>
+            <div>
+              <strong style="color: #166534; font-size: 0.95rem;">Live Current Location</strong>
+              <p style="margin: 0; font-size: 0.82rem; color: #4B5563;">${detectedLocation.fullText || "Detecting..."}</p>
+            </div>
+          </div>
+          <button class="btn-primary-large" style="padding: 6px 12px; font-size: 0.82rem;" onclick="detectUserLiveLocation(true)">
+            Detect GPS
+          </button>
         </div>
+
+        ${
+          hasSaved
+            ? `
+            <p class="home-location-subtext">Or choose from your saved addresses:</p>
+            <div class="home-saved-addresses-list">
+              ${savedAddresses
+                .map((addr) => {
+                  return `
+                    <div class="home-addr-option ${addr.isDefault ? "selected" : ""}" onclick="selectHomeAddress('${addr.id}')">
+                      <div class="home-addr-radio">
+                        <input type="radio" name="home_addr_choice" ${addr.isDefault ? "checked" : ""} />
+                      </div>
+                      <div class="home-addr-info">
+                        <div class="home-addr-tag-row">
+                          <strong>${addr.fullName}</strong>
+                          <span class="addr-tag-pill">${addr.tag}</span>
+                          ${addr.isDefault ? '<span class="badge-home">CURRENT</span>' : ""}
+                        </div>
+                        <p>${addr.houseNo}, ${addr.area}, ${addr.city} - <strong>${addr.pincode}</strong></p>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join("")}
+            </div>
+            `
+            : `
+            <div style="text-align: center; padding: 20px 10px;">
+              <p style="color: #64748B; font-size: 0.9rem; margin-bottom: 12px;">You haven't saved any addresses yet.</p>
+              <button class="btn-proceed-checkout" style="width: auto; padding: 10px 18px; margin: 0 auto;" onclick="closeHomeLocationModal(); openProfilePage('address');">
+                <i class="fa-solid fa-plus"></i> Add Delivery Address in Profile
+              </button>
+            </div>
+            `
+        }
 
         <div class="home-location-footer-note">
           <i class="fa-solid fa-circle-info"></i>
-          <span>Want to add a new address? Open your <strong>Profile > Address Book</strong>.</span>
+          <span>Want to add or manage addresses? Open your <strong>Profile > Address Book</strong>.</span>
         </div>
       </div>
     </div>
@@ -691,11 +780,12 @@ function selectHomeAddress(id) {
   closeHomeLocationModal();
 }
 
-// Regular background ticker to auto-update order status in real time
+// Background auto-delivery ticker
 setInterval(checkAndUpdateAutoDelivery, 30000);
 
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
+  detectUserLiveLocation();
   checkAndUpdateAutoDelivery();
   syncActiveAddressToNavbar();
 

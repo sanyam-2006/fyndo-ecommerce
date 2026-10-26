@@ -27,7 +27,7 @@
     <div class="top-announcement">
       <div class="container announcement-inner">
         <span><i class="fa-solid fa-bolt"></i> <strong>Group Deal Hour:</strong> Team up with neighbors & save up to 60%!</span>
-        <span class="delivery-time"><i class="fa-regular fa-clock"></i> Delivery in 24 Hours to Tindola</span>
+        <span class="delivery-time"><i class="fa-regular fa-clock"></i> Express 2-Hour Doorstep Delivery</span>
       </div>
     </div>
 
@@ -48,7 +48,7 @@
           <i class="fa-solid fa-location-dot"></i>
           <div class="location-text">
             <span class="deliver-label">Deliver to:</span>
-            <span class="current-city" id="current-city">Tindola, 225003</span>
+            <span class="current-city" id="current-city">Detecting Location...</span>
           </div>
           <i class="fa-solid fa-angle-down"></i>
         </div>
@@ -101,17 +101,23 @@
             <div class="stat-pill"><i class="fa-solid fa-shield-halved"></i> 100% Quality Guaranteed</div>
           </div>
         </div>
-        <div class="hero-card-promo">
-          <span class="deal-tag"><i class="fa-solid fa-bolt"></i> Deal of the Day</span>
+        <div class="hero-card">
+          <div class="deal-card-badge">⚡ Deal of the Day</div>
           <h3>Chana Dal & Cooking Oil Combo</h3>
           <p class="deal-subtext">500+ groups completed today</p>
-          <div class="deal-savings">52% OFF ₹149 <del>₹310</del></div>
-          <button class="btn-primary-large" onclick="openCartDrawer()">Explore Deals <i class="fa-solid fa-arrow-right"></i></button>
+          <div class="deal-pricing">
+            <span class="deal-discount">52% OFF</span>
+            <span class="deal-price">₹149</span>
+            <span class="deal-mrp">₹310</span>
+          </div>
+          <button class="btn-group-deal" onclick="window.scrollTo({top: 500, behavior: 'smooth'})">
+            Explore Deals <i class="fa-solid fa-arrow-right"></i>
+          </button>
         </div>
       </section>
 
       <!-- Category Filter Tabs -->
-      <section class="category-section">
+      <section class="categories-container">
         <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Shop by Category</h2>
         <div class="category-tabs" id="category-tabs">
           <button class="category-btn active" data-category="all">All Deals</button>
@@ -133,7 +139,7 @@
       </section>
     </main>
 
-    <!-- Slide-over Fullscreen Cart View -->
+    <!-- Slide-over Cart View -->
     <aside id="cart-drawer" class="cart-drawer hidden"></aside>
 
     <!-- Checkout Modal -->
@@ -161,8 +167,8 @@
           <aside class="profile-sidebar">
             <div class="profile-user-card">
               <div class="profile-avatar-large"><i class="fa-solid fa-circle-user"></i></div>
-              <h3 class="profile-user-name" id="puser-name">Sanyam Verma</h3>
-              <p class="profile-user-email" id="puser-email">sanyam@fyndo.com</p>
+              <h3 class="profile-user-name" id="puser-name">My Account</h3>
+              <p class="profile-user-email" id="puser-email">shopper@fyndo.com</p>
             </div>
 
             <nav class="profile-nav-menu">
@@ -192,6 +198,7 @@
 
     <!-- FULL-SCREEN AUTHENTICATION & DATABASE DASHBOARD -->
     <div id="auth-modal" class="auth-fullscreen-view hidden">
+      <!-- Fullscreen Topbar -->
       <div class="auth-fs-topbar">
         <div class="container auth-fs-topbar-inner">
           <button class="btn-auth-back" onclick="closeAuthModal()">
@@ -204,16 +211,17 @@
         </div>
       </div>
 
+      <!-- Main Fullscreen Auth Body -->
       <div class="container auth-fs-body">
         <div class="auth-master-card">
           <!-- Perks Banner -->
           <div class="auth-perks-sidebar">
             <div>
-              <span class="perks-badge"><i class="fa-solid fa-bolt"></i> Real Cloud Account</span>
+              <span class="perks-badge"><i class="fa-solid fa-bolt"></i> REAL CLOUD ACCOUNT</span>
               <h3>Shop Wholesale & Team Up with Neighbors</h3>
               <ul class="auth-perks-list">
                 <li><i class="fa-solid fa-circle-check"></i> Group savings up to 60% on 100+ items</li>
-                <li><i class="fa-solid fa-circle-check"></i> 24-Hour Express doorstep delivery to Tindola</li>
+                <li><i class="fa-solid fa-circle-check"></i> 24-Hour Express doorstep delivery</li>
                 <li><i class="fa-solid fa-circle-check"></i> Orders synced to your Google Firestore account</li>
                 <li><i class="fa-solid fa-circle-check"></i> Free delivery on all carts above ₹199</li>
               </ul>
@@ -241,7 +249,7 @@
             <form id="auth-signin-form" onsubmit="handleUserSignIn(event)">
               <div class="form-group">
                 <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
-                <input type="email" id="login-email" placeholder="e.g. sanyam@gmail.com" required />
+                <input type="email" id="login-email" placeholder="e.g. joe@gmail.com" required />
               </div>
               <div class="form-group">
                 <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
@@ -259,26 +267,26 @@
             <form id="auth-register-form" class="hidden" onsubmit="handleUserRegister(event)">
               <div class="form-group">
                 <label for="reg-name"><i class="fa-solid fa-user"></i> Full Name</label>
-                <input type="text" id="reg-name" placeholder="e.g. Sanyam Verma" required />
+                <input type="text" id="reg-name" placeholder="e.g. Joe Mac" required />
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label for="reg-email"><i class="fa-solid fa-envelope"></i> Email</label>
-                  <input type="email" id="reg-email" placeholder="name@gmail.com" required />
+                  <input type="email" id="reg-email" placeholder="e.g. joe@gmail.com" required />
                 </div>
                 <div class="form-group">
                   <label for="reg-phone"><i class="fa-solid fa-phone"></i> Phone Number</label>
-                  <input type="tel" id="reg-phone" placeholder="10-digit mobile" required />
+                  <input type="tel" id="reg-phone" placeholder="10-digit mobile" required pattern="[0-9]{10}" />
                 </div>
               </div>
               <div class="form-group">
                 <label for="reg-address"><i class="fa-solid fa-house"></i> Delivery Address</label>
-                <input type="text" id="reg-address" placeholder="House no, street, or landmark in Tindola" required />
+                <input type="text" id="reg-address" placeholder="House no, street, or landmark" required />
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label for="reg-pincode"><i class="fa-solid fa-location-pin"></i> Pincode</label>
-                  <input type="text" id="reg-pincode" value="225003" required />
+                  <input type="text" id="reg-pincode" placeholder="6-digit Pincode" required pattern="[0-9]{6}" />
                 </div>
                 <div class="form-group">
                   <label for="reg-password"><i class="fa-solid fa-lock"></i> Create Password</label>

@@ -1,25 +1,16 @@
 // ========================================================
 // Fyndo Checkout: Dynamic Delivery Estimation & Order Sync
+// Supports New User Inline Address Input & Old User Saved Address
 // ========================================================
 
-// Default fallback address
-let userAddress = {
-  fullName: "Sanyam Verma",
-  phone: "9876543210",
-  houseNo: "House No. 12, Main Bazar",
-  area: "Village Tindola",
-  city: "Tindola",
-  pincode: "225003",
-  state: "Uttar Pradesh"
-};
+// Fallback address reference (null for new visitors)
+let userAddress = null;
 
 // Helper: Calculate 2-Hour Delivery Estimate Rounded to Next Whole Hour
-// Example: If order placed at 12:19 PM, +2 hours rounded up = 3:00 PM ("Today before 3:00 PM")
 function getEstimatedDeliveryInfo(orderDateObj = new Date()) {
   const currentHour = orderDateObj.getHours(); // 0 - 23
   const currentMinutes = orderDateObj.getMinutes(); // 0 - 59
 
-  // Delivery takes ~2 hours; rounding up to the next round hour if minutes > 0
   let targetHour = currentHour + 2 + (currentMinutes > 0 ? 1 : 0);
 
   let isTomorrow = false;
@@ -34,7 +25,6 @@ function getEstimatedDeliveryInfo(orderDateObj = new Date()) {
   const dayFormatted = isTomorrow ? "Tomorrow" : "Today";
   const deliveryText = `${dayFormatted} before ${timeFormatted}`;
 
-  // Millisecond timestamp when delivery is considered reached
   const targetDate = new Date(orderDateObj);
   if (isTomorrow) {
     targetDate.setDate(targetDate.getDate() + 1);
@@ -55,7 +45,9 @@ function openCheckoutModal() {
   if (!modal) return;
 
   const { totalItems, finalPayable, groupSavings, hasGroupItems } = calculateCartTotals();
-  const currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : userAddress;
+  const currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : null;
+  const detectedCity = (typeof detectedLocation !== "undefined" && detectedLocation.city && detectedLocation.city !== "Detecting Location...") ? detectedLocation.city : "";
+  const detectedPin = (typeof detectedLocation !== "undefined" && detectedLocation.pincode) ? detectedLocation.pincode : "";
 
   modal.innerHTML = `
     <div class="modal-card">
@@ -92,22 +84,85 @@ function openCheckoutModal() {
           </div>
         </div>
 
-        <!-- Address Selection Form -->
+        <!-- Address Selection / Input Form -->
         <form id="address-form" onsubmit="handleConfirmOrder(event)">
-          <div class="saved-address-card selected">
-            <div class="address-radio-row">
-              <input type="radio" id="default-addr" name="selected_address" checked />
-              <label for="default-addr">
-                <strong>Deliver to Default Address</strong>
-                <span class="badge-home">${currentDef.tag || "HOME"}</span>
-              </label>
-            </div>
-            <div class="address-details-text">
-              <p class="addr-name">${currentDef.fullName} <span class="addr-phone">(${currentDef.phone})</span></p>
-              <p class="addr-line">${currentDef.houseNo}, ${currentDef.area || ""}</p>
-              <p class="addr-city">${currentDef.city}, ${currentDef.state || "Uttar Pradesh"} - <strong>${currentDef.pincode}</strong></p>
-            </div>
-          </div>
+          ${
+            currentDef
+              ? `
+              <!-- EXISTING USER: Saved Default Address Card -->
+              <div class="saved-address-card selected">
+                <div class="address-radio-row">
+                  <input type="radio" id="default-addr" name="selected_address" checked />
+                  <label for="default-addr">
+                    <strong>Deliver to Default Address</strong>
+                    <span class="badge-home">${currentDef.tag || "HOME"}</span>
+                  </label>
+                </div>
+                <div class="address-details-text">
+                  <p class="addr-name">${currentDef.fullName} <span class="addr-phone">(${currentDef.phone})</span></p>
+                  <p class="addr-line">${currentDef.houseNo}, ${currentDef.area || ""}</p>
+                  <p class="addr-city">${currentDef.city}, ${currentDef.state || "Uttar Pradesh"} - <strong>${currentDef.pincode}</strong></p>
+                </div>
+                <div style="margin-top: 10px; text-align: right;">
+                  <button type="button" class="btn-edit-addr" style="display: inline-flex;" onclick="closeCheckoutModal(); openProfilePage('address');">
+                    <i class="fa-solid fa-pen-to-square"></i> Change or Add Address
+                  </button>
+                </div>
+              </div>
+              `
+              : `
+              <!-- NEW USER: Empty Delivery Address Form (Auto-prefills detected location) -->
+              <div style="background: #FFF7ED; border: 1.5px solid #FFEDD5; border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 18px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <i class="fa-solid fa-map-pin" style="color: var(--primary); font-size: 1.2rem;"></i>
+                  <div>
+                    <strong style="color: #9A3412; font-size: 1rem;">Enter Your Delivery Address</strong>
+                    <p style="margin: 0; font-size: 0.82rem; color: #7C2D12;">Please enter your details to receive this order</p>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label><i class="fa-solid fa-user"></i> Full Name *</label>
+                    <input type="text" id="chk-name" placeholder="Receiver's full name" required />
+                  </div>
+                  <div class="form-group">
+                    <label><i class="fa-solid fa-phone"></i> Mobile Number *</label>
+                    <input type="tel" id="chk-phone" placeholder="10-digit mobile number" required pattern="[0-9]{10}" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="fa-solid fa-house"></i> Flat / House No. / Building *</label>
+                  <input type="text" id="chk-house" placeholder="House No., Building Name" required />
+                </div>
+
+                <div class="form-group">
+                  <label><i class="fa-solid fa-road"></i> Street / Area / Landmark *</label>
+                  <input type="text" id="chk-area" placeholder="Street, Colony, Landmark" required />
+                </div>
+
+                <div class="form-grid-3">
+                  <div class="form-group">
+                    <label><i class="fa-solid fa-city"></i> City *</label>
+                    <input type="text" id="chk-city" value="${detectedCity}" placeholder="City" required />
+                  </div>
+                  <div class="form-group">
+                    <label><i class="fa-solid fa-map-pin"></i> Pincode *</label>
+                    <input type="text" id="chk-pin" value="${detectedPin}" placeholder="6-digit Pincode" required pattern="[0-9]{6}" />
+                  </div>
+                  <div class="form-group">
+                    <label><i class="fa-solid fa-tag"></i> Address Tag</label>
+                    <select id="chk-tag" class="select-input">
+                      <option value="HOME">Home</option>
+                      <option value="WORK">Work</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              `
+          }
 
           <!-- Payment Mode Note -->
           <div class="payment-method-box">
@@ -115,7 +170,7 @@ function openCheckoutModal() {
               <i class="fa-solid fa-money-bill-wave"></i>
               <div>
                 <strong>Cash / UPI on Delivery (Selected)</strong>
-                <p>Pay safely when your order arrives at ${currentDef.city} in ~2 hours.</p>
+                <p>Pay safely when your order arrives at your door in ~2 hours.</p>
               </div>
             </div>
           </div>
@@ -157,11 +212,45 @@ function handleConfirmOrder(event) {
     hour12: true
   });
 
-  // Calculate dynamic 2-hour delivery estimate based on current time
   const estDelivery = getEstimatedDeliveryInfo(now);
 
-  const currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : userAddress;
-  const deliveryAddrText = `${currentDef.houseNo}, ${currentDef.area || ""}, ${currentDef.city} - ${currentDef.pincode}`;
+  let currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : null;
+  let deliveryAddrText = "";
+
+  if (currentDef) {
+    // Old user with saved address
+    deliveryAddrText = `${currentDef.houseNo}, ${currentDef.area || ""}, ${currentDef.city} - ${currentDef.pincode}`;
+  } else {
+    // New user who just filled the address form
+    const chkName = document.getElementById("chk-name").value.trim();
+    const chkPhone = document.getElementById("chk-phone").value.trim();
+    const chkHouse = document.getElementById("chk-house").value.trim();
+    const chkArea = document.getElementById("chk-area").value.trim();
+    const chkCity = document.getElementById("chk-city").value.trim();
+    const chkPin = document.getElementById("chk-pin").value.trim();
+    const chkTag = document.getElementById("chk-tag").value;
+
+    const newAddr = {
+      id: "addr-" + Date.now(),
+      fullName: chkName,
+      phone: chkPhone,
+      houseNo: chkHouse,
+      area: chkArea,
+      city: chkCity,
+      pincode: chkPin,
+      state: "Uttar Pradesh",
+      tag: chkTag || "HOME",
+      isDefault: true
+    };
+
+    if (typeof savedAddresses !== "undefined") {
+      savedAddresses.push(newAddr);
+      if (typeof saveAddresses === "function") saveAddresses();
+    }
+
+    deliveryAddrText = `${chkHouse}, ${chkArea}, ${chkCity} - ${chkPin}`;
+    currentDef = newAddr;
+  }
 
   const buyTypeSummary = hasGroupItems && hasSoloItems ? "Mixed Deal" : (hasGroupItems ? "Group Deal" : "Solo Buy");
 
@@ -172,8 +261,8 @@ function handleConfirmOrder(event) {
       date: orderDate,
       placementTime: placementTime,
       placedTimestamp: now.getTime(),
-      status: "active", // Starts as 'active' (Out for Delivery)
-      deliveryTimestamp: estDelivery.deliveryTimestamp, // Real timestamp when order automatically transitions to delivered
+      status: "active",
+      deliveryTimestamp: estDelivery.deliveryTimestamp,
       estimatedDeliveryText: estDelivery.deliveryText,
       totalPaid: finalPayable,
       totalSaved: hasGroupItems ? groupSavings : 0,
@@ -195,7 +284,7 @@ function handleConfirmOrder(event) {
   localStorage.removeItem(CART_STORAGE_KEY);
   updateHeaderCartInfo();
 
-  // Show Order Success Screen with 2-Hour Estimated Delivery and Group Discount Breakdown
+  // Show Order Success Screen
   renderOrderSuccessModal(
     orderId,
     orderDate,
@@ -251,7 +340,7 @@ function renderOrderSuccessModal(
         </div>
         <div class="receipt-row">
           <span>Delivering To:</span>
-          <span><strong>${deliveryAddrText || "Tindola, 225003"}</strong></span>
+          <span><strong>${deliveryAddrText || "Your Address"}</strong></span>
         </div>
         <div class="receipt-row">
           <span>Estimated Delivery:</span>

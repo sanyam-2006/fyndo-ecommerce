@@ -100,14 +100,16 @@ async function handleUserRegister(e) {
 
     await user.updateProfile({ displayName: name });
 
+    const userCity = (typeof detectedLocation !== "undefined" && detectedLocation.city && detectedLocation.city !== "Detecting Location...") ? detectedLocation.city : "My City";
+
     const userDocData = {
       uid: user.uid,
       name: name,
       email: email,
       phone: phone,
       address: address,
-      city: "Tindola",
-      pincode: pincode || "225003",
+      city: userCity,
+      pincode: pincode || "",
       state: "Uttar Pradesh",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
@@ -153,10 +155,10 @@ async function handleUserSignIn(e) {
       currentUserProfile = {
         name: user.displayName || "Shopper",
         email: user.email,
-        phone: "9876543210",
-        address: "Village Tindola",
-        city: "Tindola",
-        pincode: "225003",
+        phone: "",
+        address: "",
+        city: (typeof detectedLocation !== "undefined" && detectedLocation.city && detectedLocation.city !== "Detecting Location...") ? detectedLocation.city : "",
+        pincode: "",
         state: "Uttar Pradesh"
       };
     }
@@ -206,7 +208,7 @@ auth.onAuthStateChanged(async (user) => {
 
     const firstName = (currentUserProfile.name || "User").split(" ")[0];
     
-    // Clicking user badge opens the FULL PROFILE DASHBOARD!
+    // Clicking user badge opens the Profile Dashboard
     authContainer.innerHTML = `
       <div class="user-logged-box" onclick="openProfilePage('orders')" title="Click to view My Profile & Orders">
         <span class="user-avatar"><i class="fa-solid fa-circle-user"></i></span>
@@ -255,5 +257,5 @@ function showToastNotification(msg) {
   clearTimeout(toast.toastTimeout);
   toast.toastTimeout = setTimeout(() => {
     toast.classList.remove("show");
-  }, 2800);
+  }, 2200);
 }
