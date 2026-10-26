@@ -5,24 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fyndo | Group Deals & Community Shopping</title>
   
-  <!-- Modern Clean Typography -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
-  <!-- Stylesheet -->
+  <!-- Application CSS -->
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Google Firebase v10 CDN Scripts (Authentication & Cloud Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div id="app">
-    <!-- Top Deal Alert Bar -->
+    <!-- Top Announcement Bar -->
     <div class="top-announcement">
       <div class="container announcement-inner">
         <span><i class="fa-solid fa-bolt"></i> <strong>Group Deal Hour:</strong> Team up with neighbors & save up to 60%!</span>
-        <span class="delivery-time"><i class="fa-regular fa-clock"></i> Delivery in 24 Hours</span>
+        <span class="delivery-time"><i class="fa-regular fa-clock"></i> Delivery in 24 Hours to Tindola</span>
       </div>
     </div>
 
@@ -38,12 +43,11 @@
           <span class="brand-tagline">Bachat Har Deal Par</span>
         </div>
 
-        <!-- DealShare-style Location Selector -->
+        <!-- Location Selector -->
         <div class="location-picker" id="location-selector">
           <i class="fa-solid fa-location-dot"></i>
           <div class="location-text">
             <span class="deliver-label">Deliver to:</span>
-            <!-- AFTER -->
             <span class="current-city" id="current-city">Tindola, 225003</span>
           </div>
           <i class="fa-solid fa-angle-down"></i>
@@ -52,17 +56,21 @@
         <!-- Search Bar -->
         <div class="search-box">
           <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <input type="text" id="search-input" placeholder="Search for aata, dal, snacks, oil..." />
+          <input type="text" id="search-input" placeholder="Search for milk, biscuits, namkeen, atta, oil..." />
           <button type="button" class="btn-search">Search</button>
         </div>
 
-        <!-- Actions: User Profile & Cart Button -->
+        <!-- Header Actions: Auth Profile & Cart -->
         <div class="header-actions">
-          <button class="action-btn" id="login-btn">
-            <i class="fa-regular fa-user"></i>
-            <span>Sign In</span>
-          </button>
+          <!-- Dynamic Firebase Auth Container -->
+          <div id="header-auth-container">
+            <button class="action-btn" id="login-btn" onclick="openAuthModal('signin')">
+              <i class="fa-regular fa-user"></i>
+              <span>Sign In</span>
+            </button>
+          </div>
           
+          <!-- Cart Button -->
           <button class="action-btn cart-btn" id="open-cart-btn">
             <div class="cart-icon-wrapper">
               <i class="fa-solid fa-cart-shopping"></i>
@@ -79,7 +87,7 @@
 
     <!-- Main Content Area -->
     <main class="container main-content">
-      <!-- Hero Banner (DealShare Community Deal Style) -->
+      <!-- Hero Banner -->
       <section class="hero-banner">
         <div class="hero-content">
           <div class="hero-badge"><i class="fa-solid fa-users"></i> Community Group Buying</div>
@@ -114,27 +122,24 @@
         <div class="category-tabs" id="category-tabs">
           <button class="category-btn active" data-category="all">All Deals</button>
           <button class="category-btn" data-category="grocery">Grocery & Staples</button>
-          <button class="category-btn" data-category="snacks">Snacks & Drinks</button>
+          <button class="category-btn" data-category="snacks">Snacks & Namkeens</button>
           <button class="category-btn" data-category="fruits-veg">Fruits & Veggies</button>
           <button class="category-btn" data-category="household">Household Essentials</button>
           <button class="category-btn" data-category="personal-care">Personal Care</button>
         </div>
       </section>
 
-      <!-- Products Grid Section (Will be populated dynamically in Step 3) -->
+      <!-- Products Grid -->
       <section class="products-section">
         <div class="section-header">
-          <h2 class="section-title"><i class="fa-solid fa-fire"></i> Live Group Deals</h2>
+          <h2 class="section-title"><i class="fa-solid fa-fire"></i> Live Community Group Deals</h2>
           <span class="deal-counter"><i class="fa-solid fa-user-group"></i> 2,410 People Shopping Now</span>
         </div>
-        <div class="products-grid" id="products-grid">
-          <!-- Products will render here dynamically -->
-        </div>
+        <div class="products-grid" id="products-grid"></div>
       </section>
     </main>
 
-    <!-- Slide-over Cart Drawer -->
-    <div id="cart-drawer-overlay" class="drawer-overlay hidden"></div>
+    <!-- Slide-over Cart View -->
     <aside id="cart-drawer" class="cart-drawer hidden"></aside>
 
     <!-- Checkout Modal -->
@@ -142,9 +147,148 @@
 
     <!-- Order Success Modal -->
     <div id="order-success-modal" class="modal-overlay hidden"></div>
+
+    <!-- FULL-SCREEN AUTHENTICATION & DATABASE DASHBOARD -->
+    <div id="auth-modal" class="auth-fullscreen-view hidden">
+      <!-- Fullscreen Topbar -->
+      <div class="auth-fs-topbar">
+        <div class="container auth-fs-topbar-inner">
+          <button class="btn-auth-back" onclick="closeAuthModal()">
+            <i class="fa-solid fa-arrow-left"></i> Return to Shopping
+          </button>
+          <div class="brand-logo">
+            <span class="logo-text">Fyndo<span class="logo-dot">.</span></span>
+          </div>
+          <button class="btn-fs-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Main Fullscreen Auth Body -->
+      <div class="auth-fs-center-container">
+        <div class="auth-master-card">
+          <!-- Left Column: Community Perks Sidebar -->
+          <div class="auth-perks-sidebar">
+            <div class="auth-perks-header">
+              <span class="perk-badge"><i class="fa-solid fa-crown"></i> Community Members</span>
+              <h2>Bachat Har Deal Par!</h2>
+              <p>Join thousands of smart shoppers in Tindola saving together on daily groceries.</p>
+            </div>
+
+            <div class="auth-perks-list">
+              <div class="perk-item">
+                <i class="fa-solid fa-percent"></i>
+                <span>Up to 60% Wholesale Discounts</span>
+              </div>
+              <div class="perk-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Group Buying with Tindola Neighbors</span>
+              </div>
+              <div class="perk-item">
+                <i class="fa-solid fa-truck-fast"></i>
+                <span>Free 24h Doorstep Delivery</span>
+              </div>
+              <div class="perk-item">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>100% Quality Guaranteed</span>
+              </div>
+            </div>
+
+            <div class="auth-trust-note">
+              <i class="fa-solid fa-lock"></i> Secured with Google Firebase Cloud
+            </div>
+          </div>
+
+          <!-- Right Column: Form (Sign In & Register Tabs) -->
+          <div class="auth-form-column">
+            <!-- Navigation Tabs -->
+            <div class="auth-tabs-header">
+              <button id="tab-btn-signin" class="auth-tab-btn active" onclick="switchAuthTab('signin')">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+              </button>
+              <button id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')">
+                <i class="fa-solid fa-user-plus"></i> New Register
+              </button>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="auth-error-msg" class="auth-error-box hidden"></div>
+
+            <!-- SIGN IN FORM -->
+            <form id="auth-signin-form" onsubmit="handleUserSignIn(event)">
+              <h3 class="auth-form-title">Sign In to Your Account</h3>
+              <p class="auth-form-desc">Enter your email and password to access your cart and orders.</p>
+
+              <div class="form-group">
+                <label for="login-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+                <input type="email" id="login-email" placeholder="e.g. joe@gmail.com" required />
+              </div>
+
+              <div class="form-group">
+                <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password" required />
+              </div>
+
+              <button type="submit" id="btn-signin-submit" class="btn-auth-submit">
+                Sign In to Fyndo <i class="fa-solid fa-arrow-right"></i>
+              </button>
+
+              <p class="auth-switch-text">
+                Don't have an account? <a href="#" onclick="switchAuthTab('register')">Register here</a>
+              </p>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="auth-register-form" class="hidden" onsubmit="handleUserRegister(event)">
+              <h3 class="auth-form-title">Create Free Account</h3>
+              <p class="auth-form-desc">Save your address and unlock unlimited community group deals!</p>
+
+              <div class="form-group">
+                <label for="reg-name"><i class="fa-regular fa-user"></i> Full Name</label>
+                <input type="text" id="reg-name" placeholder="e.g. Joe Mac" required />
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="reg-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+                  <input type="email" id="reg-email" placeholder="e.g. joe@gmail.com" required />
+                </div>
+                <div class="form-group">
+                  <label for="reg-phone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+                  <input type="tel" id="reg-phone" placeholder="10-digit mobile" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-address"><i class="fa-solid fa-house"></i> Delivery Address</label>
+                <input type="text" id="reg-address" placeholder="House no, street, or landmark" required />
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="reg-pincode"><i class="fa-solid fa-location-pin"></i> Pincode</label>
+                  <input type="text" id="reg-pincode" value="225003" required />
+                </div>
+                <div class="form-group">
+                  <label for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+                  <input type="password" id="reg-password" placeholder="At least 6 characters" required />
+                </div>
+              </div>
+
+              <button type="submit" id="btn-register-submit" class="btn-auth-submit">Register to Fyndo<i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+              <p class="auth-switch-text">
+                Already have an account? <a href="#" onclick="switchAuthTab('signin')">Sign In</a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
+  <script src="js/auth.js"></script>
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/checkout.js"></script>

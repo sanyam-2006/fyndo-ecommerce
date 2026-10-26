@@ -198,6 +198,51 @@ body {
   gap: 12px;
 }
 
+.user-logged-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F1F5F9;
+  padding: 6px 14px;
+  border-radius: 30px;
+  border: 1px solid #E2E8F0;
+}
+
+.user-avatar {
+  font-size: 1.3rem;
+  color: var(--primary);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.user-hello {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.user-display-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+.btn-logout {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding-left: 6px;
+}
+
+.btn-logout:hover {
+  color: #EF4444;
+}
+
 .action-btn {
   background: transparent;
   border: none;
@@ -859,7 +904,6 @@ body {
   box-shadow: 0 4px 18px rgba(0,0,0,0.06);
 }
 
-/* BIG PROMINENT TOTAL AMOUNT TO BE PAID BOX */
 .cart-total-pay-box {
   background: linear-gradient(135deg, #FFF5EE 0%, #FFEDD5 100%);
   border: 2.5px solid var(--primary);
@@ -1008,7 +1052,7 @@ body {
 }
 
 /* ========================================================
-   TOAST NOTIFICATION (WHEN ADDING TO CART)
+   TOAST NOTIFICATION
    ======================================================== */
 .cart-toast {
   position: fixed;
@@ -1055,12 +1099,12 @@ body {
 }
 
 /* ========================================================
-   MODAL OVERLAY, ADDRESS & ORDER CONFIRMATION
+   CHECKOUT MODAL & ORDER CONFIRMATION
    ======================================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(4px);
   z-index: 2000;
   display: flex;
@@ -1074,7 +1118,7 @@ body {
   width: 540px;
   max-width: 95vw;
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
   overflow: hidden;
   animation: modalPop 0.25s ease-out;
 }
@@ -1168,14 +1212,8 @@ body {
   line-height: 1.4;
 }
 
-.addr-name {
-  font-weight: 700;
-}
-
-.addr-phone {
-  color: var(--text-muted);
-  font-weight: 500;
-}
+.addr-name { font-weight: 700; }
+.addr-phone { color: var(--text-muted); font-weight: 500; }
 
 .payment-method-box {
   background: #F8FAFC;
@@ -1221,14 +1259,12 @@ body {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  transition: background 0.2s;
 }
 
 .btn-confirm-order:hover {
   background: #047857;
 }
 
-/* --- ORDER SUCCESS SCREEN --- */
 .success-card {
   text-align: center;
   padding: 36px 28px;
@@ -1326,11 +1362,294 @@ body {
   background: var(--primary-hover);
 }
 
+/* ========================================================
+   FULL-SCREEN DEDICATED AUTHENTICATION DASHBOARD
+   ======================================================== */
+.auth-fullscreen-view {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #F8FAFC;
+  z-index: 3000;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-fs-topbar {
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  padding: 14px 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.auth-fs-topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-auth-back {
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-auth-back:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.auth-fs-center-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.auth-master-card {
+  width: 900px;
+  max-width: 100%;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  overflow: hidden;
+}
+
+/* Left Column: Brand Benefits Banner */
+.auth-perks-sidebar {
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  color: white;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.auth-perks-header .perk-badge {
+  display: inline-block;
+  background: rgba(255, 82, 0, 0.25);
+  color: #FFA573;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.auth-perks-header h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.auth-perks-header p {
+  font-size: 0.88rem;
+  color: #CBD5E1;
+  line-height: 1.4;
+}
+
+.auth-perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 30px 0;
+}
+
+.perk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #F1F5F9;
+}
+
+.perk-item i {
+  color: var(--primary);
+  background: rgba(255, 82, 0, 0.15);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.auth-trust-note {
+  font-size: 0.78rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+/* Right Column: Active Form */
+.auth-form-column {
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-tabs-header {
+  display: flex;
+  border-bottom: 2px solid #F1F5F9;
+  margin-bottom: 24px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.auth-tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.auth-form-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 4px;
+}
+
+.auth-form-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.auth-error-box {
+  background: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #B91C1C;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-group label i {
+  color: var(--primary);
+}
+
+.form-group input {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: #F8FAFC;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 82, 0, 0.1);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.btn-auth-submit {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+
+.btn-auth-submit:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.auth-switch-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 18px;
+}
+
+.auth-switch-text a {
+  color: var(--primary);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-switch-text a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
-  .hero-banner {
-    grid-template-columns: 1fr;
-  }
-  .cart-fs-content {
-    grid-template-columns: 1fr;
-  }
+  .hero-banner { grid-template-columns: 1fr; }
+  .cart-fs-content { grid-template-columns: 1fr; }
+  .auth-master-card { grid-template-columns: 1fr; }
+  .auth-perks-sidebar { display: none; }
+  .form-grid-2 { grid-template-columns: 1fr; }
 }

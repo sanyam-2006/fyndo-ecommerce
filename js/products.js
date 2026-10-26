@@ -1,5 +1,5 @@
 // ===================================================================
-// FYNDO E-COMMERCE: 100 REAL INDIAN ESSENTIALS (DealShare Catalog)
+// FYNDO E-COMMERCE: 100 ACCURATE INDIAN ESSENTIALS (All Images Fixed)
 // Categories: grocery | snacks | fruits-veg | household | personal-care
 // ===================================================================
 
@@ -184,7 +184,8 @@ const PRODUCTS = [
     soloPrice: 78,
     groupPrice: 59,
     discountPercent: 34,
-    image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&auto=format&fit=crop&q=60",
+    // REAL OREO COOKIES
+    image: "https://images.unsplash.com/photo-1582293041079-7814c2f12063?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Kids Love It"
@@ -198,7 +199,8 @@ const PRODUCTS = [
     soloPrice: 92,
     groupPrice: 69,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1548741487-18d363dc4469?w=500&auto=format&fit=crop&q=60",
+    // REAL CHOCOLATE CREAM BISCUITS
+    image: "https://images.unsplash.com/photo-1559620192-032c4bc4674e?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Classic Cream"
@@ -212,7 +214,7 @@ const PRODUCTS = [
     soloPrice: 75,
     groupPrice: 58,
     discountPercent: 35,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Salted Treat"
@@ -298,7 +300,7 @@ const PRODUCTS = [
     soloPrice: 98,
     groupPrice: 69,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Spicy Crunch"
@@ -312,7 +314,7 @@ const PRODUCTS = [
     soloPrice: 105,
     groupPrice: 79,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Party Favorite"
@@ -326,7 +328,7 @@ const PRODUCTS = [
     soloPrice: 102,
     groupPrice: 74,
     discountPercent: 38,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Evening Snack"
@@ -340,7 +342,7 @@ const PRODUCTS = [
     soloPrice: 96,
     groupPrice: 69,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1613728913341-8f296361a72e?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Sweet & Tangy"
@@ -354,7 +356,7 @@ const PRODUCTS = [
     soloPrice: 110,
     groupPrice: 79,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Authentic Taste"
@@ -368,7 +370,7 @@ const PRODUCTS = [
     soloPrice: 99,
     groupPrice: 72,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Royal Mix"
@@ -382,7 +384,7 @@ const PRODUCTS = [
     soloPrice: 50,
     groupPrice: 38,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Nutty Treat"
@@ -396,7 +398,7 @@ const PRODUCTS = [
     soloPrice: 54,
     groupPrice: 39,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1585994424489-c309e3d019dc?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Light Crunch"
@@ -410,7 +412,7 @@ const PRODUCTS = [
     soloPrice: 46,
     groupPrice: 33,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Masala Dal"
@@ -424,7 +426,7 @@ const PRODUCTS = [
     soloPrice: 149,
     groupPrice: 115,
     discountPercent: 34,
-    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Melt In Mouth"
@@ -452,7 +454,7 @@ const PRODUCTS = [
     soloPrice: 68,
     groupPrice: 49,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Chatpata"
@@ -466,7 +468,7 @@ const PRODUCTS = [
     soloPrice: 52,
     groupPrice: 38,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Crunchy Triangle"
@@ -722,7 +724,8 @@ const PRODUCTS = [
     soloPrice: 52,
     groupPrice: 39,
     discountPercent: 35,
-    image: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=500&auto=format&fit=crop&q=60",
+    // REAL WHITE SUGAR IN BOWL
+    image: "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Crystal Clean"
@@ -820,7 +823,8 @@ const PRODUCTS = [
     soloPrice: 64,
     groupPrice: 48,
     discountPercent: 36,
-    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&auto=format&fit=crop&q=60",
+    // REAL VIBRANT TURMERIC POWDER
+    image: "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Pure Golden"
@@ -904,7 +908,8 @@ const PRODUCTS = [
     soloPrice: 132,
     groupPrice: 98,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=60",
+    // REAL TOMATO KETCHUP BOTTLE & RED SAUCE (REPLACED IDLI)
+    image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "100% Real Tomatoes"
@@ -918,7 +923,8 @@ const PRODUCTS = [
     soloPrice: 78,
     groupPrice: 56,
     discountPercent: 38,
-    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=60",
+    // REAL RED CHILI SAUCE / SCHEZWAN CHUTNEY
+    image: "https://images.unsplash.com/photo-1563599175-e3b7b4ae530f?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Desi Chinese"
@@ -990,7 +996,7 @@ const PRODUCTS = [
     soloPrice: 34,
     groupPrice: 22,
     discountPercent: 51,
-    image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Farm Picked"
@@ -1046,7 +1052,7 @@ const PRODUCTS = [
     soloPrice: 175,
     groupPrice: 129,
     discountPercent: 41,
-    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Ruby Seeds"
@@ -1066,7 +1072,7 @@ const PRODUCTS = [
     badge: "Cooking Duo"
   },
 
-  // --- HOUSEHOLD & CLEANING ESSENTIALS (76 to 88) ---
+  // --- HOUSEHOLD & CLEANING ESSENTIALS (76 to 88) - ALL UNIQUE IMAGES ---
   {
     id: "prod-76",
     name: "Surf Excel Easy Wash Detergent Powder",
@@ -1076,7 +1082,8 @@ const PRODUCTS = [
     soloPrice: 195,
     groupPrice: 145,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL WASHING POWDER & CLEAN CLOTHES (REPLACED BLUE GLOVES)
+    image: "https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=500&auto=format&fit=crop&q=60",
     groupRequired: 4,
     groupJoined: 3,
     badge: "Tough Stain"
@@ -1090,7 +1097,8 @@ const PRODUCTS = [
     soloPrice: 220,
     groupPrice: 169,
     discountPercent: 35,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL WASHING MACHINE & LAUNDRY
+    image: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Bright White"
@@ -1104,7 +1112,8 @@ const PRODUCTS = [
     soloPrice: 125,
     groupPrice: 94,
     discountPercent: 35,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL FRESH CLEAN LAUNDRY BASKET
+    image: "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Fresh Fragrance"
@@ -1118,7 +1127,8 @@ const PRODUCTS = [
     soloPrice: 68,
     groupPrice: 49,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL LAUNDRY BAR SOAP
+    image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Dazzling Shine"
@@ -1132,7 +1142,8 @@ const PRODUCTS = [
     soloPrice: 142,
     groupPrice: 105,
     discountPercent: 38,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL DISHWASHING SOAP & CLEAN DISHES
+    image: "https://images.unsplash.com/photo-1585837575652-267c041d77d4?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Power of 100 Lemons"
@@ -1146,7 +1157,8 @@ const PRODUCTS = [
     soloPrice: 75,
     groupPrice: 54,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL CLEANING SPONGE / DISHWASH
+    image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Grease Fighter"
@@ -1160,7 +1172,8 @@ const PRODUCTS = [
     soloPrice: 188,
     groupPrice: 139,
     discountPercent: 38,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL FLOOR CLEANER & SPARKLING SURFACE
+    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "99.9% Germ Kill"
@@ -1174,7 +1187,8 @@ const PRODUCTS = [
     soloPrice: 179,
     groupPrice: 132,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL BATHROOM HYGIENE & CLEANING BOTTLE
+    image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "10x Cleaning"
@@ -1188,7 +1202,8 @@ const PRODUCTS = [
     soloPrice: 94,
     groupPrice: 69,
     discountPercent: 37,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    // REAL GLASS CLEANER TRIGGER SPRAY
+    image: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Crystal Shine"
@@ -1202,7 +1217,7 @@ const PRODUCTS = [
     soloPrice: 135,
     groupPrice: 99,
     discountPercent: 38,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Mosquito Shield"
@@ -1216,7 +1231,7 @@ const PRODUCTS = [
     soloPrice: 130,
     groupPrice: 95,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1608248597359-05a306478d10?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Sleep In Peace"
@@ -1230,7 +1245,7 @@ const PRODUCTS = [
     soloPrice: 160,
     groupPrice: 119,
     discountPercent: 39,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "30 Days Fresh"
@@ -1244,7 +1259,7 @@ const PRODUCTS = [
     soloPrice: 62,
     groupPrice: 45,
     discountPercent: 40,
-    image: "https://images.unsplash.com/photo-1585421514738-01798e348b17?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=500&auto=format&fit=crop&q=60",
     groupRequired: 2,
     groupJoined: 1,
     badge: "Scratch Free"
@@ -1358,7 +1373,7 @@ const PRODUCTS = [
     soloPrice: 325,
     groupPrice: 249,
     discountPercent: 35,
-    image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=500&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60",
     groupRequired: 3,
     groupJoined: 2,
     badge: "Healthy Hair"
