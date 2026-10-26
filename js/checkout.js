@@ -1,24 +1,61 @@
 // ========================================================
-// Fyndo Checkout: Address Selection & Order Confirmation
+// Fyndo Checkout: Dynamic Delivery Estimation & Order Sync
 // ========================================================
 
-// Default Saved Address for Tindola, 225003
+// Default fallback address
 let userAddress = {
-  fullName: "Rahul Verma",
+  fullName: "Sanyam Verma",
   phone: "9876543210",
-  houseNo: "House No. 42, Near Primary School",
+  houseNo: "House No. 12, Main Bazar",
   area: "Village Tindola",
   city: "Tindola",
   pincode: "225003",
   state: "Uttar Pradesh"
 };
 
+// Helper: Calculate 2-Hour Delivery Estimate Rounded to Next Whole Hour
+// Example: If order placed at 12:19 PM, +2 hours rounded up = 3:00 PM ("Today before 3:00 PM")
+function getEstimatedDeliveryInfo(orderDateObj = new Date()) {
+  const currentHour = orderDateObj.getHours(); // 0 - 23
+  const currentMinutes = orderDateObj.getMinutes(); // 0 - 59
+
+  // Delivery takes ~2 hours; rounding up to the next round hour if minutes > 0
+  let targetHour = currentHour + 2 + (currentMinutes > 0 ? 1 : 0);
+
+  let isTomorrow = false;
+  if (targetHour >= 24) {
+    isTomorrow = true;
+    targetHour = targetHour % 24;
+  }
+
+  const period = targetHour >= 12 ? "PM" : "AM";
+  const displayHour = targetHour % 12 === 0 ? 12 : targetHour % 12;
+  const timeFormatted = `${displayHour}:00 ${period}`;
+  const dayFormatted = isTomorrow ? "Tomorrow" : "Today";
+  const deliveryText = `${dayFormatted} before ${timeFormatted}`;
+
+  // Millisecond timestamp when delivery is considered reached
+  const targetDate = new Date(orderDateObj);
+  if (isTomorrow) {
+    targetDate.setDate(targetDate.getDate() + 1);
+  }
+  targetDate.setHours(targetHour, 0, 0, 0);
+
+  return {
+    deliveryText: deliveryText,
+    deliveryTimestamp: targetDate.getTime(),
+    timeFormatted: timeFormatted,
+    dayFormatted: dayFormatted
+  };
+}
+
 // 1. Open Address & Checkout Modal
 function openCheckoutModal() {
   const modal = document.getElementById("checkout-modal");
   if (!modal) return;
 
-  const { totalItems, finalPayable, totalSavings } = calculateCartTotals();
+  const { totalItems, finalPayable, groupSavings, hasGroupItems } = calculateCartTotals();
+  const currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : userAddress;
 
   modal.innerHTML = `
     <div class="modal-card">
@@ -34,10 +71,21 @@ function openCheckoutModal() {
             <span>Items to Deliver:</span>
             <strong>${totalItems} Items</strong>
           </div>
-          <div class="checkout-summary-item">
-            <span>You are Saving:</span>
-            <strong class="text-green">₹${totalSavings}</strong>
-          </div>
+          ${
+            hasGroupItems && groupSavings > 0
+              ? `
+              <div class="checkout-summary-item">
+                <span>Group Savings:</span>
+                <strong class="text-green">₹${groupSavings} Saved</strong>
+              </div>
+              `
+              : `
+              <div class="checkout-summary-item">
+                <span>Purchase Mode:</span>
+                <strong style="color: #64748b;">Solo Buy</strong>
+              </div>
+              `
+          }
           <div class="checkout-summary-item total-item">
             <span>Total Payable:</span>
             <strong class="text-orange">₹${finalPayable}</strong>
@@ -50,24 +98,24 @@ function openCheckoutModal() {
             <div class="address-radio-row">
               <input type="radio" id="default-addr" name="selected_address" checked />
               <label for="default-addr">
-                <strong>Deliver to This Address (Recommended)</strong>
-                <span class="badge-home">HOME</span>
+                <strong>Deliver to Default Address</strong>
+                <span class="badge-home">${currentDef.tag || "HOME"}</span>
               </label>
             </div>
             <div class="address-details-text">
-              <p class="addr-name">${userAddress.fullName} <span class="addr-phone">(${userAddress.phone})</span></p>
-              <p class="addr-line">${userAddress.houseNo}, ${userAddress.area}</p>
-              <p class="addr-city">${userAddress.city}, ${userAddress.state} - <strong>${userAddress.pincode}</strong></p>
+              <p class="addr-name">${currentDef.fullName} <span class="addr-phone">(${currentDef.phone})</span></p>
+              <p class="addr-line">${currentDef.houseNo}, ${currentDef.area || ""}</p>
+              <p class="addr-city">${currentDef.city}, ${currentDef.state || "Uttar Pradesh"} - <strong>${currentDef.pincode}</strong></p>
             </div>
           </div>
 
-          <!-- Payment Mode Note (No real payment, Pay on Delivery) -->
+          <!-- Payment Mode Note -->
           <div class="payment-method-box">
             <div class="payment-option">
               <i class="fa-solid fa-money-bill-wave"></i>
               <div>
                 <strong>Cash / UPI on Delivery (Selected)</strong>
-                <p>Pay safely when your order arrives at Tindola within 24 hours.</p>
+                <p>Pay safely when your order arrives at ${currentDef.city} in ~2 hours.</p>
               </div>
             </div>
           </div>
@@ -90,17 +138,53 @@ function closeCheckoutModal() {
   if (modal) modal.classList.add("hidden");
 }
 
-// 2. Handle Order Confirmation (Generates Order ID & Clears Cart)
+// 2. Handle Order Confirmation & Save to Profile Orders
 function handleConfirmOrder(event) {
   event.preventDefault();
 
-  const { finalPayable, totalSavings, totalItems } = calculateCartTotals();
+  const { finalPayable, groupSavings, hasGroupItems, hasSoloItems, totalItems } = calculateCartTotals();
   const orderId = "FYN-" + Math.floor(100000 + Math.random() * 900000);
-  const orderDate = new Date().toLocaleDateString("en-IN", {
+  
+  const now = new Date();
+  const orderDate = now.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric"
   });
+  const placementTime = now.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+
+  // Calculate dynamic 2-hour delivery estimate based on current time
+  const estDelivery = getEstimatedDeliveryInfo(now);
+
+  const currentDef = typeof getDefaultAddress === "function" ? getDefaultAddress() : userAddress;
+  const deliveryAddrText = `${currentDef.houseNo}, ${currentDef.area || ""}, ${currentDef.city} - ${currentDef.pincode}`;
+
+  const buyTypeSummary = hasGroupItems && hasSoloItems ? "Mixed Deal" : (hasGroupItems ? "Group Deal" : "Solo Buy");
+
+  // RECORD TO ORDERS STATE
+  if (typeof userOrdersList !== "undefined") {
+    userOrdersList.unshift({
+      orderId: orderId,
+      date: orderDate,
+      placementTime: placementTime,
+      placedTimestamp: now.getTime(),
+      status: "active", // Starts as 'active' (Out for Delivery)
+      deliveryTimestamp: estDelivery.deliveryTimestamp, // Real timestamp when order automatically transitions to delivered
+      estimatedDeliveryText: estDelivery.deliveryText,
+      totalPaid: finalPayable,
+      totalSaved: hasGroupItems ? groupSavings : 0,
+      hasGroupItems: hasGroupItems,
+      buyType: buyTypeSummary,
+      itemsCount: totalItems,
+      deliveryAddress: deliveryAddrText,
+      items: cart.map((i) => ({ ...i }))
+    });
+    if (typeof saveOrders === "function") saveOrders();
+  }
 
   // Close modals & cart
   closeCheckoutModal();
@@ -111,12 +195,32 @@ function handleConfirmOrder(event) {
   localStorage.removeItem(CART_STORAGE_KEY);
   updateHeaderCartInfo();
 
-  // Show Order Success Screen
-  renderOrderSuccessModal(orderId, orderDate, finalPayable, totalSavings, totalItems);
+  // Show Order Success Screen with 2-Hour Estimated Delivery and Group Discount Breakdown
+  renderOrderSuccessModal(
+    orderId,
+    orderDate,
+    placementTime,
+    estDelivery.deliveryText,
+    finalPayable,
+    groupSavings,
+    hasGroupItems,
+    totalItems,
+    deliveryAddrText
+  );
 }
 
 // 3. Render Order Confirmation Success Screen
-function renderOrderSuccessModal(orderId, orderDate, totalPaid, totalSaved, totalItems) {
+function renderOrderSuccessModal(
+  orderId,
+  orderDate,
+  placementTime,
+  estimatedDeliveryText,
+  totalPaid,
+  totalSaved,
+  hasGroupItems,
+  totalItems,
+  deliveryAddrText
+) {
   const successModal = document.getElementById("order-success-modal");
   if (!successModal) return;
 
@@ -128,7 +232,11 @@ function renderOrderSuccessModal(orderId, orderDate, totalPaid, totalSaved, tota
       
       <h2 class="success-title">Order Placed Successfully!</h2>
       <p class="success-subtitle">
-        Your group deal has been locked! We are preparing your order for delivery.
+        ${
+          hasGroupItems
+            ? "Your group deal has been locked! We are preparing your order for express community delivery."
+            : "Your solo order has been confirmed! We are preparing your fresh grocery shipment."
+        }
       </p>
 
       <!-- Order Receipt Details -->
@@ -139,39 +247,53 @@ function renderOrderSuccessModal(orderId, orderDate, totalPaid, totalSaved, tota
         </div>
         <div class="receipt-row">
           <span>Order Placed On:</span>
-          <span>${orderDate}</span>
+          <span>${orderDate} at ${placementTime}</span>
         </div>
         <div class="receipt-row">
           <span>Delivering To:</span>
-          <span><strong>${userAddress.city}, ${userAddress.pincode}</strong></span>
+          <span><strong>${deliveryAddrText || "Tindola, 225003"}</strong></span>
         </div>
         <div class="receipt-row">
           <span>Estimated Delivery:</span>
-          <span class="text-green"><strong>Tomorrow by 5:00 PM</strong></span>
+          <span class="text-green"><strong><i class="fa-solid fa-bolt"></i> ${estimatedDeliveryText}</strong> (in ~2 hrs)</span>
         </div>
         <div class="receipt-row">
           <span>Total Items:</span>
-          <span>${totalItems}</span>
+          <span>${totalItems} Items</span>
         </div>
+
         <hr class="receipt-divider" />
-        <div class="receipt-row">
-          <span>Community Savings:</span>
-          <strong class="text-green">₹${totalSaved} Saved</strong>
-        </div>
+
+        ${
+          hasGroupItems && totalSaved > 0
+            ? `
+            <div class="receipt-row">
+              <span>Group Discount Savings:</span>
+              <strong class="text-green">₹${totalSaved} Saved</strong>
+            </div>
+            `
+            : `
+            <div class="receipt-row">
+              <span>Purchase Mode:</span>
+              <span><strong>Solo Buy (No Group Discount)</strong></span>
+            </div>
+            `
+        }
+
         <div class="receipt-row total-receipt-row">
           <span>Amount to Pay on Delivery:</span>
           <strong class="receipt-total">₹${totalPaid}</strong>
         </div>
       </div>
 
-      <div class="success-delivery-badge">
-        <i class="fa-solid fa-truck-fast"></i>
-        <span>Free doorstep delivery to Tindola, 225003</span>
+      <div class="success-actions-row">
+        <button class="btn-view-profile-orders" onclick="closeOrderSuccessModal(); openProfilePage('orders');">
+          <i class="fa-solid fa-box-open"></i> View in My Orders
+        </button>
+        <button class="btn-success-continue" onclick="closeOrderSuccessModal()">
+          Continue Shopping
+        </button>
       </div>
-
-      <button class="btn-success-continue" onclick="closeOrderSuccessModal()">
-        Continue Shopping on Fyndo
-      </button>
     </div>
   `;
 
@@ -185,6 +307,5 @@ function closeOrderSuccessModal() {
     successModal.classList.add("hidden");
     document.body.style.overflow = "auto";
   }
-  // Re-render empty cart
   renderCartDrawer();
 }

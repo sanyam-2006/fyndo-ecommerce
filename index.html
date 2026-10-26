@@ -101,23 +101,17 @@
             <div class="stat-pill"><i class="fa-solid fa-shield-halved"></i> 100% Quality Guaranteed</div>
           </div>
         </div>
-        <div class="hero-card">
-          <div class="deal-card-badge">⚡ Deal of the Day</div>
+        <div class="hero-card-promo">
+          <span class="deal-tag"><i class="fa-solid fa-bolt"></i> Deal of the Day</span>
           <h3>Chana Dal & Cooking Oil Combo</h3>
           <p class="deal-subtext">500+ groups completed today</p>
-          <div class="deal-pricing">
-            <span class="deal-discount">52% OFF</span>
-            <span class="deal-price">₹149</span>
-            <span class="deal-mrp">₹310</span>
-          </div>
-          <button class="btn-group-deal" onclick="window.scrollTo({top: 500, behavior: 'smooth'})">
-            Explore Deals <i class="fa-solid fa-arrow-right"></i>
-          </button>
+          <div class="deal-savings">52% OFF ₹149 <del>₹310</del></div>
+          <button class="btn-primary-large" onclick="openCartDrawer()">Explore Deals <i class="fa-solid fa-arrow-right"></i></button>
         </div>
       </section>
 
       <!-- Category Filter Tabs -->
-      <section class="categories-container">
+      <section class="category-section">
         <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Shop by Category</h2>
         <div class="category-tabs" id="category-tabs">
           <button class="category-btn active" data-category="all">All Deals</button>
@@ -139,7 +133,7 @@
       </section>
     </main>
 
-    <!-- Slide-over Cart View -->
+    <!-- Slide-over Fullscreen Cart View -->
     <aside id="cart-drawer" class="cart-drawer hidden"></aside>
 
     <!-- Checkout Modal -->
@@ -148,9 +142,56 @@
     <!-- Order Success Modal -->
     <div id="order-success-modal" class="modal-overlay hidden"></div>
 
+    <!-- Home Address Quick-Switcher Modal (Select Saved Address) -->
+    <div id="home-address-modal" class="modal-overlay hidden"></div>
+
+    <!-- FULL-SCREEN USER PROFILE & ORDERS DASHBOARD -->
+    <div id="profile-modal" class="profile-modal hidden">
+      <div class="profile-fs-wrapper">
+        <div class="profile-fs-header">
+          <div class="profile-brand-box">
+            <span class="logo-icon"><i class="fa-solid fa-basket-shopping"></i></span>
+            <span class="profile-title">Fyndo Account Dashboard</span>
+          </div>
+          <button class="btn-fs-close" onclick="closeProfilePage()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="profile-fs-layout">
+          <!-- Profile Sidebar -->
+          <aside class="profile-sidebar">
+            <div class="profile-user-card">
+              <div class="profile-avatar-large"><i class="fa-solid fa-circle-user"></i></div>
+              <h3 class="profile-user-name" id="puser-name">Sanyam Verma</h3>
+              <p class="profile-user-email" id="puser-email">sanyam@fyndo.com</p>
+            </div>
+
+            <nav class="profile-nav-menu">
+              <button class="profile-nav-item active" id="pnav-orders" onclick="switchProfileTab('orders')">
+                <i class="fa-solid fa-box-open"></i> My Orders
+              </button>
+              <button class="profile-nav-item" id="pnav-address" onclick="switchProfileTab('address')">
+                <i class="fa-solid fa-map-location-dot"></i> Address Book
+              </button>
+              <button class="profile-nav-item" id="pnav-rate" onclick="switchProfileTab('rate')">
+                <i class="fa-solid fa-star"></i> Rate Fyndo
+              </button>
+            </nav>
+
+            <button class="btn-sidebar-logout" onclick="handleUserSignOut()">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </button>
+          </aside>
+
+          <!-- Main Dynamic Tab Content -->
+          <main class="profile-main-content" id="profile-tab-content">
+            <!-- Dynamic tab content populated via profile.js -->
+          </main>
+        </div>
+      </div>
+    </div>
+
     <!-- FULL-SCREEN AUTHENTICATION & DATABASE DASHBOARD -->
     <div id="auth-modal" class="auth-fullscreen-view hidden">
-      <!-- Fullscreen Topbar -->
       <div class="auth-fs-topbar">
         <div class="container auth-fs-topbar-inner">
           <button class="btn-auth-back" onclick="closeAuthModal()">
@@ -163,120 +204,90 @@
         </div>
       </div>
 
-      <!-- Main Fullscreen Auth Body -->
-      <div class="auth-fs-center-container">
+      <div class="container auth-fs-body">
         <div class="auth-master-card">
-          <!-- Left Column: Community Perks Sidebar -->
+          <!-- Perks Banner -->
           <div class="auth-perks-sidebar">
-            <div class="auth-perks-header">
-              <span class="perk-badge"><i class="fa-solid fa-crown"></i> Community Members</span>
-              <h2>Bachat Har Deal Par!</h2>
-              <p>Join thousands of smart shoppers in Tindola saving together on daily groceries.</p>
+            <div>
+              <span class="perks-badge"><i class="fa-solid fa-bolt"></i> Real Cloud Account</span>
+              <h3>Shop Wholesale & Team Up with Neighbors</h3>
+              <ul class="auth-perks-list">
+                <li><i class="fa-solid fa-circle-check"></i> Group savings up to 60% on 100+ items</li>
+                <li><i class="fa-solid fa-circle-check"></i> 24-Hour Express doorstep delivery to Tindola</li>
+                <li><i class="fa-solid fa-circle-check"></i> Orders synced to your Google Firestore account</li>
+                <li><i class="fa-solid fa-circle-check"></i> Free delivery on all carts above ₹199</li>
+              </ul>
             </div>
-
-            <div class="auth-perks-list">
-              <div class="perk-item">
-                <i class="fa-solid fa-percent"></i>
-                <span>Up to 60% Wholesale Discounts</span>
-              </div>
-              <div class="perk-item">
-                <i class="fa-solid fa-users"></i>
-                <span>Group Buying with Tindola Neighbors</span>
-              </div>
-              <div class="perk-item">
-                <i class="fa-solid fa-truck-fast"></i>
-                <span>Free 24h Doorstep Delivery</span>
-              </div>
-              <div class="perk-item">
-                <i class="fa-solid fa-shield-halved"></i>
-                <span>100% Quality Guaranteed</span>
-              </div>
-            </div>
-
-            <div class="auth-trust-note">
-              <i class="fa-solid fa-lock"></i> Secured with Google Firebase Cloud
+            <div class="auth-card-footer-quote">
+              <p>“Bachat Har Deal Par with Fyndo Community Buying”</p>
             </div>
           </div>
 
-          <!-- Right Column: Form (Sign In & Register Tabs) -->
-          <div class="auth-form-column">
-            <!-- Navigation Tabs -->
-            <div class="auth-tabs-header">
-              <button id="tab-btn-signin" class="auth-tab-btn active" onclick="switchAuthTab('signin')">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+          <!-- Active Form Container -->
+          <div class="auth-form-container">
+            <div class="auth-tab-nav">
+              <button type="button" id="tab-btn-signin" class="auth-tab-btn active" onclick="switchAuthTab('signin')">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In
               </button>
-              <button id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')">
-                <i class="fa-solid fa-user-plus"></i> New Register
+              <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="switchAuthTab('register')">
+                <i class="fa-solid fa-user-plus"></i> New Registration
               </button>
             </div>
 
-            <!-- Error Banner -->
+            <!-- Error Box -->
             <div id="auth-error-msg" class="auth-error-box hidden"></div>
 
-            <!-- SIGN IN FORM -->
+            <!-- Sign In Form -->
             <form id="auth-signin-form" onsubmit="handleUserSignIn(event)">
-              <h3 class="auth-form-title">Sign In to Your Account</h3>
-              <p class="auth-form-desc">Enter your email and password to access your cart and orders.</p>
-
               <div class="form-group">
-                <label for="login-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
-                <input type="email" id="login-email" placeholder="e.g. joe@gmail.com" required />
+                <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                <input type="email" id="login-email" placeholder="e.g. sanyam@gmail.com" required />
               </div>
-
               <div class="form-group">
                 <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
                 <input type="password" id="login-password" placeholder="Enter your password" required />
               </div>
-
               <button type="submit" id="btn-signin-submit" class="btn-auth-submit">
                 Sign In to Fyndo <i class="fa-solid fa-arrow-right"></i>
               </button>
-
               <p class="auth-switch-text">
-                Don't have an account? <a href="#" onclick="switchAuthTab('register')">Register here</a>
+                Don't have an account yet? <a href="#" onclick="switchAuthTab('register')">Register here</a>
               </p>
             </form>
 
-            <!-- REGISTER FORM -->
+            <!-- Register Form -->
             <form id="auth-register-form" class="hidden" onsubmit="handleUserRegister(event)">
-              <h3 class="auth-form-title">Create Free Account</h3>
-              <p class="auth-form-desc">Save your address and unlock unlimited community group deals!</p>
-
               <div class="form-group">
-                <label for="reg-name"><i class="fa-regular fa-user"></i> Full Name</label>
-                <input type="text" id="reg-name" placeholder="e.g. Joe Mac" required />
+                <label for="reg-name"><i class="fa-solid fa-user"></i> Full Name</label>
+                <input type="text" id="reg-name" placeholder="e.g. Sanyam Verma" required />
               </div>
-
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label for="reg-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
-                  <input type="email" id="reg-email" placeholder="e.g. joe@gmail.com" required />
+                  <label for="reg-email"><i class="fa-solid fa-envelope"></i> Email</label>
+                  <input type="email" id="reg-email" placeholder="name@gmail.com" required />
                 </div>
                 <div class="form-group">
                   <label for="reg-phone"><i class="fa-solid fa-phone"></i> Phone Number</label>
                   <input type="tel" id="reg-phone" placeholder="10-digit mobile" required />
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="reg-address"><i class="fa-solid fa-house"></i> Delivery Address</label>
-                <input type="text" id="reg-address" placeholder="House no, street, or landmark" required />
+                <input type="text" id="reg-address" placeholder="House no, street, or landmark in Tindola" required />
               </div>
-
               <div class="form-grid-2">
                 <div class="form-group">
                   <label for="reg-pincode"><i class="fa-solid fa-location-pin"></i> Pincode</label>
                   <input type="text" id="reg-pincode" value="225003" required />
                 </div>
                 <div class="form-group">
-                  <label for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+                  <label for="reg-password"><i class="fa-solid fa-lock"></i> Create Password</label>
                   <input type="password" id="reg-password" placeholder="At least 6 characters" required />
                 </div>
               </div>
-
-              <button type="submit" id="btn-register-submit" class="btn-auth-submit">Register to Fyndo<i class="fa-solid fa-arrow-right"></i>
-            </button>
-
+              <button type="submit" id="btn-register-submit" class="btn-auth-submit">
+                Register to Fyndo <i class="fa-solid fa-arrow-right"></i>
+              </button>
               <p class="auth-switch-text">
                 Already have an account? <a href="#" onclick="switchAuthTab('signin')">Sign In</a>
               </p>
@@ -287,10 +298,11 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Scripts in Correct Dependency Order -->
   <script src="js/auth.js"></script>
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
+  <script src="js/profile.js"></script>
   <script src="js/checkout.js"></script>
   <script src="js/app.js"></script>
 </body>

@@ -1,5 +1,5 @@
 // ========================================================
-// Fyndo Cart State: Manual Open Only & Toast Feedback
+// Fyndo Cart Management: Solo vs Group Pricing & Financials
 // ========================================================
 
 const CART_STORAGE_KEY = "fyndo_cart_v1";
@@ -13,12 +13,13 @@ function saveCart() {
   renderCartDrawer();
 }
 
-// 2. Add Item to Cart (DOES NOT automatically open cart anymore!)
+// 2. Add Item to Cart (buyType: 'solo' or 'group')
 function addToCart(productId, buyType) {
   const product = PRODUCTS.find((p) => p.id === productId);
   if (!product) return;
 
   const itemKey = `${productId}_${buyType}`;
+  // Solo purchase uses soloPrice; Group deal uses groupPrice
   const price = buyType === "group" ? product.groupPrice : product.soloPrice;
   const existingItem = cart.find((item) => item.key === itemKey);
 
@@ -39,8 +40,6 @@ function addToCart(productId, buyType) {
   }
 
   saveCart();
-  
-  // Show quick notification on screen without navigating away
   showCartToast(product.name, buyType);
 }
 
@@ -89,19 +88,34 @@ function removeFromCart(itemKey) {
   saveCart();
 }
 
-// 6. Calculate Financials
+// 6. Calculate Financials: Explicit Solo vs Group Segregation
 function calculateCartTotals() {
   let totalItems = 0;
   let totalMRP = 0;
   let subtotal = 0;
+  let groupSavings = 0;
+  let groupItemsCount = 0;
+  let soloItemsCount = 0;
 
   cart.forEach((item) => {
     totalItems += item.quantity;
     totalMRP += item.mrp * item.quantity;
     subtotal += item.price * item.quantity;
+
+    if (item.buyType === "group") {
+      groupItemsCount += item.quantity;
+      const savingPerItem = Math.max(0, item.mrp - item.price);
+      groupSavings += savingPerItem * item.quantity;
+    } else {
+      soloItemsCount += item.quantity;
+    }
   });
 
-  const totalSavings = totalMRP - subtotal;
+  const hasGroupItems = groupItemsCount > 0;
+  const hasSoloItems = soloItemsCount > 0;
+  const isPureSoloOrder = totalItems > 0 && groupItemsCount === 0;
+
+  // Free delivery for orders above ₹199
   const deliveryCharge = subtotal > 199 || subtotal === 0 ? 0 : 30;
   const finalPayable = subtotal + deliveryCharge;
 
@@ -109,7 +123,13 @@ function calculateCartTotals() {
     totalItems,
     totalMRP,
     subtotal,
-    totalSavings,
+    groupSavings,
+    groupItemsCount,
+    soloItemsCount,
+    hasGroupItems,
+    hasSoloItems,
+    isPureSoloOrder,
+    totalSavings: groupSavings,
     deliveryCharge,
     finalPayable
   };
@@ -125,12 +145,21 @@ function updateHeaderCartInfo() {
   if (totalDisplay) totalDisplay.innerText = `₹${subtotal}`;
 }
 
-// 8. Render FULL-SCREEN View
+// 8. Render Full-Screen Cart Drawer
 function renderCartDrawer() {
   const drawer = document.getElementById("cart-drawer");
   if (!drawer) return;
 
-  const { totalItems, totalMRP, subtotal, totalSavings, deliveryCharge, finalPayable } = calculateCartTotals();
+  const {
+    totalItems,
+    totalMRP,
+    subtotal,
+    groupSavings,
+    hasGroupItems,
+    isPureSoloOrder,
+    deliveryCharge,
+    finalPayable
+  } = calculateCartTotals();
 
   // If Cart is Empty
   if (cart.length === 0) {
@@ -147,8 +176,8 @@ function renderCartDrawer() {
       <div class="cart-fs-empty">
         <i class="fa-solid fa-cart-arrow-down"></i>
         <h3>Your Cart is Currently Empty</h3>
-        <p>You haven't added any items yet. Team up with neighbors to unlock community discounts!</p>
-        <button class="btn-primary-large" onclick="closeCartDrawer()">Explore Group Deals</button>
+        <p>You haven't added any items yet. Shop Solo or team up with neighbors to unlock community discounts!</p>
+        <button class="btn-primary-large" onclick="closeCartDrawer()">Explore Deals</button>
       </div>
     `;
     return;
@@ -171,32 +200,52 @@ function renderCartDrawer() {
     <div class="container cart-fs-content">
       <!-- Left Column: Items List -->
       <div class="cart-fs-left">
-        <div class="cart-fs-savings-banner">
-          <i class="fa-solid fa-circle-check"></i>
-          <div>
-            <strong>Community Group Deal Active!</strong>
-            <p>You are saving <strong>₹${totalSavings}</strong> off original MRP on this order.</p>
-          </div>
-        </div>
+        <!-- Conditional Banner: Shown only when Group Deal items exist, or neutral banner for Solo -->
+        ${
+          hasGroupItems && groupSavings > 0
+            ? `
+            <div class="cart-fs-savings-banner">
+              <i class="fa-solid fa-users"></i>
+              <div>
+                <strong>Community Group Deal Active!</strong>
+                <p>You are saving <strong>₹${groupSavings}</strong> with community group discounts on this order.</p>
+              </div>
+            </div>
+            `
+            : `
+            <div class="cart-fs-savings-banner" style="background: #F8FAFC; border-color: #E2E8F0; color: #475569;">
+              <i class="fa-solid fa-bag-shopping" style="color: #64748B;"></i>
+              <div>
+                <strong>Solo Purchase Mode</strong>
+                <p style="margin: 0; font-size: 0.88rem; color: #64748B;">Standard pricing applied. Tip: Select "Buy with Group" on products to unlock extra savings!</p>
+              </div>
+            </div>
+            `
+        }
 
         <div class="cart-fs-items-container">
           ${cart
             .map((item) => {
               const isGroup = item.buyType === "group";
+              const itemSavings = Math.max(0, item.mrp - item.price);
               return `
                 <div class="cart-fs-item-card">
                   <img src="${item.image}" alt="${item.name}" class="cart-fs-img" />
                   
                   <div class="cart-fs-details">
                     <span class="cart-item-badge ${isGroup ? "group-badge" : "solo-badge"}">
-                      ${isGroup ? '<i class="fa-solid fa-bolt"></i> Group Deal' : 'Solo Buy'}
+                      ${isGroup ? '<i class="fa-solid fa-bolt"></i> Group Deal' : '<i class="fa-solid fa-user"></i> Solo Buy'}
                     </span>
                     <h3 class="cart-fs-item-name">${item.name}</h3>
                     <span class="cart-fs-item-unit">${item.unit}</span>
                     <div class="cart-fs-item-price-row">
                       <span class="cart-fs-price">₹${item.price}</span>
-                      <span class="cart-fs-mrp">₹${item.mrp}</span>
-                      <span class="cart-fs-save-tag">Save ₹${item.mrp - item.price} each</span>
+                      ${isGroup && item.mrp > item.price ? `<span class="cart-fs-mrp">₹${item.mrp}</span>` : ""}
+                      ${
+                        isGroup && itemSavings > 0
+                          ? `<span class="cart-fs-save-tag"><i class="fa-solid fa-bolt"></i> Save ₹${itemSavings} each</span>`
+                          : ""
+                      }
                     </div>
                   </div>
 
@@ -230,14 +279,31 @@ function renderCartDrawer() {
           </div>
 
           <h3 class="bill-title">Order Bill Breakdown</h3>
-          <div class="bill-row">
-            <span>Total Item MRP</span>
-            <span>₹${totalMRP}</span>
-          </div>
-          <div class="bill-row savings-row">
-            <span>Group Discount Savings</span>
-            <span>- ₹${totalSavings}</span>
-          </div>
+          
+          ${
+            hasGroupItems && groupSavings > 0
+              ? `
+              <div class="bill-row">
+                <span>Total Item MRP</span>
+                <span>₹${totalMRP}</span>
+              </div>
+              <div class="bill-row savings-row">
+                <span><i class="fa-solid fa-bolt"></i> Group Discount Savings</span>
+                <span class="savings-amount">- ₹${groupSavings}</span>
+              </div>
+              `
+              : `
+              <div class="bill-row">
+                <span>Items Subtotal</span>
+                <span>₹${subtotal}</span>
+              </div>
+              <div class="bill-row">
+                <span>Pricing Mode</span>
+                <span><strong style="color: #64748b;">Solo Buy (No Group Discount)</strong></span>
+              </div>
+              `
+          }
+
           <div class="bill-row">
             <span>Delivery Fee</span>
             <span>${deliveryCharge === 0 ? '<strong class="free-tag">FREE (Orders above ₹199)</strong>' : `₹${deliveryCharge}`}</span>
@@ -265,7 +331,7 @@ function renderCartDrawer() {
   `;
 }
 
-// 9. Open / Close Helpers (Only opened via Cart Button)
+// 9. Open / Close Helpers
 function openCartDrawer() {
   const drawer = document.getElementById("cart-drawer");
   if (drawer) {

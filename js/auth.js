@@ -92,7 +92,7 @@ async function handleUserRegister(e) {
 
   const submitBtn = document.getElementById("btn-register-submit");
   submitBtn.disabled = true;
-  submitBtn.innerText = "Saving to Google Database...";
+  submitBtn.innerText = "Registering...";
 
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
@@ -205,24 +205,26 @@ auth.onAuthStateChanged(async (user) => {
     }
 
     const firstName = (currentUserProfile.name || "User").split(" ")[0];
+    
+    // Clicking user badge opens the FULL PROFILE DASHBOARD!
     authContainer.innerHTML = `
-      <div class="user-logged-box">
+      <div class="user-logged-box" onclick="openProfilePage('orders')" title="Click to view My Profile & Orders">
         <span class="user-avatar"><i class="fa-solid fa-circle-user"></i></span>
         <div class="user-meta">
           <span class="user-hello">Hi,</span>
           <span class="user-display-name">${firstName}</span>
         </div>
-        <button class="btn-logout" onclick="handleUserSignOut()" title="Sign Out">
+        <button class="btn-logout" onclick="event.stopPropagation(); handleUserSignOut();" title="Sign Out">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     `;
 
-    if (typeof userAddress !== "undefined" && currentUserProfile.address) {
-      userAddress.fullName = currentUserProfile.name || userAddress.fullName;
-      userAddress.phone = currentUserProfile.phone || userAddress.phone;
-      userAddress.houseNo = currentUserProfile.address || userAddress.houseNo;
-    }
+    // Update Profile Modal Sidebar user details
+    const puserName = document.getElementById("puser-name");
+    const puserEmail = document.getElementById("puser-email");
+    if (puserName) puserName.innerText = currentUserProfile.name || user.displayName || "User";
+    if (puserEmail) puserEmail.innerText = user.email || "user@fyndo.com";
   } else {
     currentUserProfile = null;
     authContainer.innerHTML = `
